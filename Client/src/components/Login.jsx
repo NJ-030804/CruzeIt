@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
 import { toast } from "react-hot-toast";
@@ -10,6 +10,34 @@ const Login = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  // Handle Google OAuth callback token
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const error = urlParams.get('error');
+
+    if (token) {
+      // Store token
+      localStorage.setItem("token", token);
+      setToken(token);
+      
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Close login modal
+      setShowLogin(false);
+      
+      toast.success("Login successful!");
+      navigate("/");
+    }
+
+    if (error) {
+      toast.error("Google authentication failed. Please try again.");
+      // Clear error from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [setToken, setShowLogin, navigate]);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
