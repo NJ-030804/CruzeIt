@@ -1,0 +1,514 @@
+import React, { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Title from '../../components/owner/Title'
+import { useAppContext } from '../../context/AppContext'
+import {toast} from 'react-hot-toast'
+
+const ManageBookings = () => {
+
+  const {currency, axios} = useAppContext()
+
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selectedBooking, setSelectedBooking] = useState(null)
+
+  const fetchOwnerBookings = async () => {
+    try {
+      setLoading(true)
+      const {data} = await axios.get('/api/bookings/owner')
+      data.success ? setBookings(data.bookings) : toast.error(data.message)
+    } catch (error) {
+      toast.error(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const changeBookingStatus = async (bookingId, status) => {
+    try {
+      const {data} = await axios.post('/api/bookings/change-status', {bookingId, status})
+      if(data.success){
+        toast.success(data.message)
+        fetchOwnerBookings()
+      }else{
+        toast.error(data.message)
+      }
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
+
+  const handleRowClick = (booking) => {
+    setSelectedBooking(booking)
+  }
+
+  const closeModal = () => {
+    setSelectedBooking(null)
+  }
+
+  useEffect(() => {
+    fetchOwnerBookings()
+  }, [])
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2
+      }
+    }
+  }
+
+  const rowVariants = {
+    hidden: { opacity: 0, x: -20 },
+    show: { 
+      opacity: 1, 
+      x: 0,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
+    },
+    exit: {
+      opacity: 0,
+      x: 20,
+      transition: {
+        duration: 0.3
+      }
+    }
+  }
+
+  const tableVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut"
+      }
+    }
+  }
+
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
+  }
+
+  return (
+    <motion.div 
+      className="px-4 pt-10 md:px-10 w-full"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6 }}
+    >
+      <Title
+        title="Manage Bookings"
+        subTitle="Track all customer bookings, approve or cancel requests, and manage booking statuses"
+      />
+
+      <motion.div 
+        variants={tableVariants}
+        initial="hidden"
+        animate="show"
+        className="max-w-5xl w-full rounded-2xl overflow-hidden border border-borderColor mt-6 bg-white shadow-sm"
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-sm text-gray-600">
+            <thead className="bg-gray-50">
+              <motion.tr
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <th className="p-4 font-semibold text-gray-700">Car</th>
+                <th className="p-4 font-semibold text-gray-700 max-md:hidden">Date Range</th>
+                <th className="p-4 font-semibold text-gray-700">Contact</th>
+                <th className="p-4 font-semibold text-gray-700">Total</th>
+                <th className="p-4 font-semibold text-gray-700 max-md:hidden">Payment</th>
+                <th className="p-4 font-semibold text-gray-700">Actions</th>
+              </motion.tr>
+            </thead>
+            <tbody>
+              <AnimatePresence mode="popLayout">
+                {loading ? (
+                  <motion.tr
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <td colSpan="6" className="p-8 text-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <motion.div
+                          className="w-2 h-2 bg-primary rounded-full"
+                          animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                        />
+                        <motion.div
+                          className="w-2 h-2 bg-primary rounded-full"
+                          animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                        />
+                        <motion.div
+                          className="w-2 h-2 bg-primary rounded-full"
+                          animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
+                          transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                        />
+                      </div>
+                    </td>
+                  </motion.tr>
+                ) : bookings.length === 0 ? (
+                  <motion.tr
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <td colSpan="6" className="p-12 text-center">
+                      <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        className="flex flex-col items-center gap-3"
+                      >
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                          <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                        </div>
+                        <p className="text-gray-400 font-medium">No bookings yet</p>
+                        <p className="text-gray-400 text-xs">Bookings will appear here once customers make reservations</p>
+                      </motion.div>
+                    </td>
+                  </motion.tr>
+                ) : (
+                  bookings.map((booking, index) => (
+                    <motion.tr
+                      key={booking._id}
+                      variants={rowVariants}
+                      initial="hidden"
+                      animate="show"
+                      exit="exit"
+                      custom={index}
+                      onClick={() => handleRowClick(booking)}
+                      whileHover={{ 
+                        backgroundColor: '#f9fafb',
+                        transition: { duration: 0.2 }
+                      }}
+                      className="border-t border-borderColor text-gray-600 cursor-pointer"
+                    >
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <motion.img
+                            src={booking.car.image}
+                            alt=""
+                            className="h-14 w-14 aspect-square rounded-lg object-cover shadow-sm"
+                            whileHover={{ scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                          <p className="font-medium text-gray-700 max-md:hidden">
+                            {booking.car.brand} {booking.car.model}
+                          </p>
+                        </div>
+                      </td>
+
+                      <td className="p-4 max-md:hidden">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-gray-500">From</span>
+                          <span className="font-medium text-gray-700">{booking.pickupDate.split('T')[0]}</span>
+                          <span className="text-xs text-gray-500">To</span>
+                          <span className="font-medium text-gray-700">{booking.returnDate.split('T')[0]}</span>
+                        </div>
+                      </td>
+
+                      <td className="p-4">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-700">
+                            {booking.customerContact || 'Not provided'}
+                          </span>
+                        </div>
+                      </td>
+
+                      <td className="p-4">
+                        <motion.span 
+                          className="font-semibold text-gray-800"
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          {currency}{booking.price.toLocaleString()}
+                        </motion.span>
+                      </td>
+
+                      <td className="p-4 max-md:hidden">
+                        <span className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-medium">
+                          Offline
+                        </span>
+                      </td>
+
+                      <td className="p-4">
+                        {booking.status === 'Pending' ? (
+                          <motion.select 
+                            onChange={(e) => {
+                              e.stopPropagation()
+                              changeBookingStatus(booking._id, e.target.value)
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            value={booking.status}
+                            className="px-3 py-2 text-gray-700 bg-white border border-borderColor rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer font-medium text-sm"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="Cancelled">Cancel</option>
+                            <option value="Confirmed">Confirm</option>
+                          </motion.select>
+                        ) : (
+                          <motion.span
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${
+                              booking.status === 'Confirmed'
+                                ? 'bg-green-100 text-green-700 border border-green-200'
+                                : booking.status === 'Cancelled'
+                                ? 'bg-red-100 text-red-700 border border-red-200'
+                                : booking.status === 'Completed'
+                                ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                : 'bg-gray-100 text-gray-700 border border-gray-200'
+                            }`}
+                          >
+                            {booking.status}
+                          </motion.span>
+                        )}
+                      </td>
+                    </motion.tr>
+                  ))
+                )}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
+
+      {/* Booking Details Modal */}
+      <AnimatePresence>
+        {selectedBooking && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={closeModal}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Booking Details</h2>
+                <button
+                  onClick={closeModal}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="space-y-6">
+                {/* Status Badge */}
+                <div className="flex items-center gap-3">
+                  <span className={`px-4 py-2 rounded-full text-sm font-medium capitalize ${
+                    selectedBooking.status === 'Confirmed' 
+                      ? 'bg-green-100 text-green-700 border border-green-200'
+                      : selectedBooking.status === 'Pending'
+                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-200'
+                      : selectedBooking.status === 'Cancelled'
+                      ? 'bg-red-100 text-red-700 border border-red-200'
+                      : selectedBooking.status === 'Completed'
+                      ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                      : 'bg-gray-100 text-gray-700 border border-gray-200'
+                  }`}>
+                    {selectedBooking.status}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    Booking ID: {selectedBooking._id}
+                  </span>
+                </div>
+
+                {/* Car Details */}
+                <div className="border border-borderColor rounded-xl p-5 bg-gray-50">
+                  <h3 className="text-lg font-medium mb-3">Car Information</h3>
+                  <div className="flex items-start gap-4 mb-4">
+                    <img 
+                      src={selectedBooking.car.image} 
+                      alt={`${selectedBooking.car.brand} ${selectedBooking.car.model}`}
+                      className="w-24 h-24 rounded-lg object-cover shadow-sm"
+                    />
+                    <div className="flex-1">
+                      <p className="text-xl font-semibold text-gray-800">
+                        {selectedBooking.car.brand} {selectedBooking.car.model}
+                      </p>
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        {selectedBooking.car.year && (
+                          <div>
+                            <p className="text-xs text-gray-500">Year</p>
+                            <p className="text-sm font-medium">{selectedBooking.car.year}</p>
+                          </div>
+                        )}
+                        {selectedBooking.car.category && (
+                          <div>
+                            <p className="text-xs text-gray-500">Category</p>
+                            <p className="text-sm font-medium">{selectedBooking.car.category}</p>
+                          </div>
+                        )}
+                        {selectedBooking.car.transmission && (
+                          <div>
+                            <p className="text-xs text-gray-500">Transmission</p>
+                            <p className="text-sm font-medium">{selectedBooking.car.transmission}</p>
+                          </div>
+                        )}
+                        {selectedBooking.car.fuel_type && (
+                          <div>
+                            <p className="text-xs text-gray-500">Fuel Type</p>
+                            <p className="text-sm font-medium">{selectedBooking.car.fuel_type}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booking Information */}
+                <div className="border border-borderColor rounded-xl p-5">
+                  <h3 className="text-lg font-medium mb-3">Booking Information</h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Booking Date</p>
+                      <p className="font-medium">
+                        {new Date(selectedBooking.createdAt).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                    {selectedBooking.pickupDate && (
+                      <div>
+                        <p className="text-sm text-gray-500">Pickup Date</p>
+                        <p className="font-medium">
+                          {new Date(selectedBooking.pickupDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    )}
+                    {selectedBooking.returnDate && (
+                      <div>
+                        <p className="text-sm text-gray-500">Return Date</p>
+                        <p className="font-medium">
+                          {new Date(selectedBooking.returnDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </p>
+                      </div>
+                    )}
+                    {selectedBooking.pickupDate && selectedBooking.returnDate && (
+                      <div>
+                        <p className="text-sm text-gray-500">Duration</p>
+                        <p className="font-medium">
+                          {Math.ceil((new Date(selectedBooking.returnDate) - new Date(selectedBooking.pickupDate)) / (1000 * 60 * 60 * 24))} days
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Customer Information */}
+                {selectedBooking.user && (
+                  <div className="border border-borderColor rounded-xl p-5">
+                    <h3 className="text-lg font-medium mb-3">Customer Information</h3>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {(selectedBooking.user.name || selectedBooking.user.username) && (
+                        <div>
+                          <p className="text-sm text-gray-500">Customer Name</p>
+                          <p className="font-medium">{selectedBooking.user.name || selectedBooking.user.username}</p>
+                        </div>
+                      )}
+                      {selectedBooking.user.email && (
+                        <div>
+                          <p className="text-sm text-gray-500">Email</p>
+                          <p className="font-medium">{selectedBooking.user.email}</p>
+                        </div>
+                      )}
+                      {selectedBooking.customerContact && (
+                        <div>
+                          <p className="text-sm text-gray-500">Contact Number</p>
+                          <p className="font-medium">{selectedBooking.customerContact}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Price */}
+                <div className="border-t border-borderColor pt-5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg font-medium">Total Price</span>
+                    <span className="text-2xl font-semibold text-primary">
+                      {currency}{selectedBooking.price.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {selectedBooking.status === 'Pending' && (
+                  <div className="flex gap-3 pt-4">
+                    <motion.button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        changeBookingStatus(selectedBooking._id, 'Confirmed')
+                        closeModal()
+                      }}
+                      className="flex-1 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Confirm Booking
+                    </motion.button>
+                    <motion.button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        changeBookingStatus(selectedBooking._id, 'Cancelled')
+                        closeModal()
+                      }}
+                      className="flex-1 bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Cancel Booking
+                    </motion.button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  )
+}
+
+export default ManageBookings
