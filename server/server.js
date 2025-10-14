@@ -18,7 +18,7 @@ await connectDB();
 // CORS configuration - UPDATE THIS for production
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://cruze-it.vercel.app/', // Your client URL
+  'https://cruze-it.vercel.app', // Your client URL
   process.env.CLIENT_URL
 ].filter(Boolean);
 
