@@ -3,7 +3,7 @@ import {
   createTestimonial, 
   getLatestTestimonials, 
   getAllTestimonials 
-} from '../controllers/testimonialController.js'
+} from '../controllers/TestimonialController.js'
 
 const router = express.Router()
 
