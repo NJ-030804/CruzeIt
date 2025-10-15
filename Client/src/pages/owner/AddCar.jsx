@@ -256,6 +256,7 @@ const AddCar = () => {
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer"
             >
               <option value="">Select</option>
+              <option value="MPV">SUV</option>
               <option value="SUV">SUV</option>
               <option value="Sedan">Sedan</option>
               <option value="Van">Van</option>
