@@ -11,7 +11,7 @@ const AboutUs = () => {
       role: 'Scrum Master',
       image: assets.noel,
       social: {
-        github: 'https://github.com/NJ-030804'
+        github: 'https://github.com/Agent-X44'
       }
     },
     {
