@@ -194,14 +194,14 @@ const Dashboard = () => {
         >
           <h2 className="text-lg font-medium">Monthly Revenue</h2>
           <p className="text-sm text-gray-500">Revenue for current month</p>
-          <motion.p
+          <p
             className="text-3xl pt-6 font-semibold text-primary"
             animate={{ scale: [1, 1.05, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
             {currency}
             {data.monthlyRevenue.toLocaleString()}
-          </motion.p>
+          </p>
         </motion.div>
       </motion.div>
 
