@@ -17,6 +17,7 @@ const CarDetails = () => {
   const [phoneError, setPhoneError] = useState('')
   const [isPhoneValid, setIsPhoneValid] = useState(false)
   const [phoneInputFocused, setPhoneInputFocused] = useState(false)
+  const [paymentMethod, setPaymentMethod] = useState('')
   const currency = import.meta.env.VITE_CURRENCY
 
   // Handle phone input change with real-time validation
@@ -67,6 +68,12 @@ const CarDetails = () => {
       return
     }
 
+    // Validate payment method
+    if (!paymentMethod) {
+      toast.error('Please select a payment method')
+      return
+    }
+
     try {
       // Clean phone number before sending (remove formatting)
       const cleanedPhone = contactNumber.replace(/\D/g, '');
@@ -75,7 +82,8 @@ const CarDetails = () => {
         carId: car._id,
         pickupDate,
         returnDate,
-        contactNumber: cleanedPhone
+        contactNumber: cleanedPhone,
+        paymentMethod
       })
       if (data.success) {
         toast.success(data.message)
@@ -287,7 +295,7 @@ const CarDetails = () => {
                         y: -5,
                         transition: { duration: 0.2 }
                       }}
-                      className="flex flex-col items-center bg-gray-100 p-4 rounded-lg"
+                      className="flex flex-col items-center bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-4 rounded-lg shadow-sm"
                     >
                       <motion.img
                         src={icon}
@@ -497,17 +505,57 @@ const CarDetails = () => {
                 </p>
               </motion.div>
 
+              {/* Payment Method Selection */}
+              <motion.div 
+                variants={formFieldVariants}
+                initial="initial"
+                animate="animate"
+                transition={{ delay: 0.85 }}
+                className="flex flex-col gap-2"
+              >
+                <label htmlFor="payment-method">Payment Method</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'cash', label: 'Cash', icon: '' },
+                    { value: 'card', label: 'Card', icon: '' },
+                    { value: 'gcash', label: 'Gcash', icon: '' },
+                    { value: 'maya', label: 'Maya', icon: '' }
+                  ].map((method) => (
+                    <motion.button
+                      key={method.value}
+                      type="button"
+                      onClick={() => setPaymentMethod(method.value)}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
+                        paymentMethod === method.value
+                          ? 'border-primary bg-primary/10 text-primary font-semibold'
+                          : 'border-borderColor hover:border-primary/50 text-gray-600'
+                      }`}
+                    >
+                      <span className="text-xl">{method.icon}</span>
+                      <span className="text-sm">{method.label}</span>
+                    </motion.button>
+                  ))}
+                </div>
+                {!paymentMethod && (
+                  <p className="text-xs text-gray-400">
+                    Select your preferred payment method
+                  </p>
+                )}
+              </motion.div>
+
               <motion.button
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.9 }}
+                transition={{ duration: 0.6, delay: 0.95 }}
                 whileHover={{ 
                   scale: 1.02,
                   boxShadow: '0 10px 30px rgba(59, 130, 246, 0.3)'
                 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer"
-                disabled={!isPhoneValid}
+                className="w-full bg-primary hover:bg-primary-dull transition-all py-3 font-medium text-white rounded-xl cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!isPhoneValid || !paymentMethod}
               >
                 Book Now
               </motion.button>
@@ -515,7 +563,7 @@ const CarDetails = () => {
               <motion.p 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 1.0 }}
+                transition={{ duration: 0.6, delay: 1.05 }}
                 className="text-center text-sm"
               >
                 No credit card required to reserve
