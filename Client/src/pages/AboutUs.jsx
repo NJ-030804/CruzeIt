@@ -21,7 +21,7 @@ const AboutUs = () => {
       image: assets.noel,
       social: {
         linkedin: 'https://linkedin.com',
-        github: 'https://github.com'
+        github: 'https://github.com/Miaowty'
       }
     },
     {
@@ -30,7 +30,7 @@ const AboutUs = () => {
       image: assets.lance,
       social: {
         linkedin: 'https://linkedin.com',
-        github: 'https://github.com'
+        github: 'https://github.com/draknuight'
       }
     },
     {
@@ -48,7 +48,7 @@ const AboutUs = () => {
       image: assets.ayen,
       social: {
         linkedin: 'https://linkedin.com',
-        github: 'https://github.com'
+        github: 'https://github.com/ayencha1412-ux'
       }
     }
   ]
