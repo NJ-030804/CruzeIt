@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import Title from '../components/Title'
 import { useAppContext } from '../context/AppContext'
@@ -7,12 +8,24 @@ import toast from 'react-hot-toast'
 import CancelModal from '../components/CancelModal'
 
 const MyBookings = () => {
-  const { axios, user, currency } = useAppContext()
+  const { axios, user, currency, setShowLogin } = useAppContext()
+  const navigate = useNavigate()
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [actionType, setActionType] = useState('cancel') // 'cancel' or 'delete'
+
+  // Check if user is logged in
+  useEffect(() => {
+    if (!user) {
+      toast.error('Please log in or create an account to view your bookings', {
+        duration: 4000,
+        icon: '🔒'
+      })
+      setLoading(false)
+    }
+  }, [user])
 
   const fetchMyBookings = async () => {
     try {
@@ -110,6 +123,126 @@ const MyBookings = () => {
     hidden: { opacity: 0, y: 50 },
     show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
     exit: { opacity: 0, y: 50, transition: { duration: 0.4 } },
+  }
+
+  // If user is not logged in, show login prompt
+  if (!user && !loading) {
+    return (
+      <div className="px-6 md:px-16 lg:px-24 xl:px-32 2xl:px-48 mt-16 text-sm max-w-7xl mx-auto">
+        <Title title="My Bookings" subTitle="View and manage all your car bookings" align="left" />
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+          className="mt-20 flex flex-col items-center justify-center text-center"
+        >
+          {/* Lock Icon */}
+          <motion.div
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="w-24 h-24 mb-6 bg-primary/10 rounded-full flex items-center justify-center"
+          >
+            <svg 
+              className="w-12 h-12 text-primary" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2} 
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" 
+              />
+            </svg>
+          </motion.div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-2xl font-semibold text-gray-800 mb-2"
+          >
+            Authentication Required
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-gray-500 mb-8 max-w-md"
+          >
+            Please log in or create an account to view your bookings and manage your reservations.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex gap-4"
+          >
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowLogin(true)}
+              className="px-8 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dull transition-all shadow-md flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+              Log In
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/cars')}
+              className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              Browse Cars
+            </motion.button>
+          </motion.div>
+
+          {/* Decorative elements */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            transition={{ delay: 0.6 }}
+            className="mt-12 grid grid-cols-3 gap-8 text-gray-400"
+          >
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm">Track Bookings</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p className="text-sm">Manage Dates</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-sm">View History</p>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
   }
 
   return (
