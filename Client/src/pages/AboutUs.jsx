@@ -7,7 +7,7 @@ const AboutUs = () => {
   // Team members data
   const teamMembers = [
     {
-      name: 'Noel Narte',
+      name: 'Noel Narte Jr.',
       role: 'Scrum Master',
       image: assets.noel,
       social: {
