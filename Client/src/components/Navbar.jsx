@@ -80,7 +80,11 @@ const Navbar = () => {
           ${open ? "max-sm:translate-x-0" : "max-sm:translate-x-full"} `}
       >
         {menuLinks.map((link, index) => (
-          <Link key={index} to={link.path}>
+          <Link 
+            key={index} 
+            to={link.path}
+            onClick={() => setOpen(false)}
+          >
             {link.name}
           </Link>
         ))}
@@ -109,7 +113,10 @@ const Navbar = () => {
 
         <div className='flex max-sm:flex-col items-start sm:items-center gap-6'>
           <button 
-            onClick={() => isOwner ? navigate('/owner') : changeRole()}
+            onClick={() => {
+              isOwner ? navigate('/owner') : changeRole()
+              setOpen(false)
+            }}
             className="cursor-pointer hover:text-primary transition-colors"
           >
             {isOwner ? 'Dashboard' : 'List cars'}
@@ -214,7 +221,10 @@ const Navbar = () => {
             </div>
           ) : (
             <button 
-              onClick={() => setShowLogin(true)}
+              onClick={() => {
+                setShowLogin(true)
+                setOpen(false)
+              }}
               className="cursor-pointer px-8 py-2 bg-primary hover:bg-primary-dull transition-all text-white rounded-lg"
             >
               Login
