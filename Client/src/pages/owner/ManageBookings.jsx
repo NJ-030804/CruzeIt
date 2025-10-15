@@ -46,6 +46,60 @@ const ManageBookings = () => {
     setSelectedBooking(null)
   }
 
+  // Helper function to format payment method display
+  const formatPaymentMethod = (method) => {
+    if (!method) return { label: 'Not specified', icon: null };
+    
+    const paymentMethods = {
+      'cash': { 
+        label: 'Cash', 
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16V8C21 6.89543 20.1046 6 19 6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M6 9V9.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M18 15V15.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )
+      },
+      'card': { 
+        label: 'Card', 
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M7 15H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M19 6H5C3.89543 6 3 6.89543 3 8V16C3 17.1046 3.89543 18 5 18H19C20.1046 18 21 17.1046 21 16V8C21 6.89543 20.1046 6 19 6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        )
+      },
+      'gcash': { 
+        label: 'Gcash', 
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="4" width="12" height="16" rx="2" stroke="currentColor" strokeWidth="2"/>
+            <path d="M6 7H18" stroke="currentColor" strokeWidth="2"/>
+            <path d="M10 11H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M12 11V15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <path d="M10 15H14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            <circle cx="12" cy="18" r="0.5" fill="currentColor"/>
+          </svg>
+        )
+      },
+      'maya': { 
+        label: 'Maya', 
+        icon: (
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 10H3M21 10C21 8.89543 20.1046 8 19 8H5C3.89543 8 3 10M21 10V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 18V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M12 8V6C12 4.89543 12.8954 4 14 4H16C17.1046 4 18 4.89543 18 6V8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+          </svg>
+        )
+      }
+    };
+    
+    return paymentMethods[method.toLowerCase()] || { label: method, icon: null };
+  }
+
   useEffect(() => {
     fetchOwnerBookings()
   }, [])
@@ -115,7 +169,7 @@ const ManageBookings = () => {
         variants={tableVariants}
         initial="hidden"
         animate="show"
-        className="max-w-5xl w-full rounded-2xl overflow-hidden border border-borderColor mt-6 bg-white shadow-sm"
+        className="max-w-6xl w-full rounded-2xl overflow-hidden border border-borderColor mt-6 bg-white shadow-sm"
       >
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left text-sm text-gray-600">
@@ -129,7 +183,7 @@ const ManageBookings = () => {
                 <th className="p-4 font-semibold text-gray-700 max-md:hidden">Date Range</th>
                 <th className="p-4 font-semibold text-gray-700">Contact</th>
                 <th className="p-4 font-semibold text-gray-700">Total</th>
-                <th className="p-4 font-semibold text-gray-700 max-md:hidden">Payment</th>
+                <th className="p-4 font-semibold text-gray-700 max-lg:hidden">Payment</th>
                 <th className="p-4 font-semibold text-gray-700">Actions</th>
               </motion.tr>
             </thead>
@@ -185,105 +239,110 @@ const ManageBookings = () => {
                     </td>
                   </motion.tr>
                 ) : (
-                  bookings.map((booking, index) => (
-                    <motion.tr
-                      key={booking._id}
-                      variants={rowVariants}
-                      initial="hidden"
-                      animate="show"
-                      exit="exit"
-                      custom={index}
-                      onClick={() => handleRowClick(booking)}
-                      whileHover={{ 
-                        backgroundColor: '#f9fafb',
-                        transition: { duration: 0.2 }
-                      }}
-                      className="border-t border-borderColor text-gray-600 cursor-pointer"
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <motion.img
-                            src={booking.car.image}
-                            alt=""
-                            className="h-14 w-14 aspect-square rounded-lg object-cover shadow-sm"
-                            whileHover={{ scale: 1.1 }}
-                            transition={{ duration: 0.2 }}
-                          />
-                          <p className="font-medium text-gray-700 max-md:hidden">
-                            {booking.car.brand} {booking.car.model}
-                          </p>
-                        </div>
-                      </td>
+                  bookings.map((booking, index) => {
+                    const paymentInfo = formatPaymentMethod(booking.paymentMethod);
+                    
+                    return (
+                      <motion.tr
+                        key={booking._id}
+                        variants={rowVariants}
+                        initial="hidden"
+                        animate="show"
+                        exit="exit"
+                        custom={index}
+                        onClick={() => handleRowClick(booking)}
+                        whileHover={{ 
+                          backgroundColor: '#f9fafb',
+                          transition: { duration: 0.2 }
+                        }}
+                        className="border-t border-borderColor text-gray-600 cursor-pointer"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <motion.img
+                              src={booking.car.image}
+                              alt=""
+                              className="h-14 w-14 aspect-square rounded-lg object-cover shadow-sm"
+                              whileHover={{ scale: 1.1 }}
+                              transition={{ duration: 0.2 }}
+                            />
+                            <p className="font-medium text-gray-700 max-md:hidden">
+                              {booking.car.brand} {booking.car.model}
+                            </p>
+                          </div>
+                        </td>
 
-                      <td className="p-4 max-md:hidden">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs text-gray-500">From</span>
-                          <span className="font-medium text-gray-700">{booking.pickupDate.split('T')[0]}</span>
-                          <span className="text-xs text-gray-500">To</span>
-                          <span className="font-medium text-gray-700">{booking.returnDate.split('T')[0]}</span>
-                        </div>
-                      </td>
+                        <td className="p-4 max-md:hidden">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-xs text-gray-500">From</span>
+                            <span className="font-medium text-gray-700">{booking.pickupDate.split('T')[0]}</span>
+                            <span className="text-xs text-gray-500">To</span>
+                            <span className="font-medium text-gray-700">{booking.returnDate.split('T')[0]}</span>
+                          </div>
+                        </td>
 
-                      <td className="p-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-sm font-medium text-gray-700">
-                            {booking.customerContact || 'Not provided'}
-                          </span>
-                        </div>
-                      </td>
+                        <td className="p-4">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-sm font-medium text-gray-700">
+                              {booking.customerContact || 'Not provided'}
+                            </span>
+                          </div>
+                        </td>
 
-                      <td className="p-4">
-                        <motion.span 
-                          className="font-semibold text-gray-800"
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          {currency}{booking.price.toLocaleString()}
-                        </motion.span>
-                      </td>
-
-                      <td className="p-4 max-md:hidden">
-                        <span className="bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full text-xs font-medium">
-                          Offline
-                        </span>
-                      </td>
-
-                      <td className="p-4">
-                        {booking.status === 'Pending' ? (
-                          <motion.select 
-                            onChange={(e) => {
-                              e.stopPropagation()
-                              changeBookingStatus(booking._id, e.target.value)
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            value={booking.status}
-                            className="px-3 py-2 text-gray-700 bg-white border border-borderColor rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer font-medium text-sm"
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                        <td className="p-4">
+                          <motion.span 
+                            className="font-semibold text-gray-800"
+                            whileHover={{ scale: 1.05 }}
                           >
-                            <option value="Pending">Pending</option>
-                            <option value="Cancelled">Cancel</option>
-                            <option value="Confirmed">Confirm</option>
-                          </motion.select>
-                        ) : (
-                          <motion.span
-                            initial={{ scale: 0.8, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${
-                              booking.status === 'Confirmed'
-                                ? 'bg-green-100 text-green-700 border border-green-200'
-                                : booking.status === 'Cancelled'
-                                ? 'bg-red-100 text-red-700 border border-red-200'
-                                : booking.status === 'Completed'
-                                ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                : 'bg-gray-100 text-gray-700 border border-gray-200'
-                            }`}
-                          >
-                            {booking.status}
+                            {currency}{booking.price.toLocaleString()}
                           </motion.span>
-                        )}
-                      </td>
-                    </motion.tr>
-                  ))
+                        </td>
+
+                        <td className="p-4 max-lg:hidden">
+                          <div className="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full w-fit">
+                            {paymentInfo.icon}
+                            <span className="text-xs font-medium text-gray-700">{paymentInfo.label}</span>
+                          </div>
+                        </td>
+
+                        <td className="p-4">
+                          {booking.status === 'Pending' ? (
+                            <motion.select 
+                              onChange={(e) => {
+                                e.stopPropagation()
+                                changeBookingStatus(booking._id, e.target.value)
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              value={booking.status}
+                              className="px-3 py-2 text-gray-700 bg-white border border-borderColor rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer font-medium text-sm"
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Cancelled">Cancel</option>
+                              <option value="Confirmed">Confirm</option>
+                            </motion.select>
+                          ) : (
+                            <motion.span
+                              initial={{ scale: 0.8, opacity: 0 }}
+                              animate={{ scale: 1, opacity: 1 }}
+                              className={`inline-block px-4 py-1.5 rounded-full text-xs font-semibold ${
+                                booking.status === 'Confirmed'
+                                  ? 'bg-green-100 text-green-700 border border-green-200'
+                                  : booking.status === 'Cancelled'
+                                  ? 'bg-red-100 text-red-700 border border-red-200'
+                                  : booking.status === 'Completed'
+                                  ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                  : 'bg-gray-100 text-gray-700 border border-gray-200'
+                              }`}
+                            >
+                              {booking.status}
+                            </motion.span>
+                          )}
+                        </td>
+                      </motion.tr>
+                    );
+                  })
                 )}
               </AnimatePresence>
             </tbody>
@@ -463,13 +522,25 @@ const ManageBookings = () => {
                   </div>
                 )}
 
-                {/* Price */}
-                <div className="border-t border-borderColor pt-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-lg font-medium">Total Price</span>
-                    <span className="text-2xl font-semibold text-primary">
-                      {currency}{selectedBooking.price.toLocaleString()}
-                    </span>
+                {/* Payment Information */}
+                <div className="border border-borderColor rounded-xl p-5 bg-gradient-to-br from-primary/5 to-primary/10">
+                  <h3 className="text-lg font-medium mb-3">Payment Information</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Payment Method</span>
+                      <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-primary/20">
+                        <span className="text-xl">{formatPaymentMethod(selectedBooking.paymentMethod).icon}</span>
+                        <span className="font-semibold text-gray-800">
+                          {formatPaymentMethod(selectedBooking.paymentMethod).label}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-3 border-t border-primary/20">
+                      <span className="text-lg font-medium">Total Price</span>
+                      <span className="text-2xl font-semibold text-primary">
+                        {currency}{selectedBooking.price.toLocaleString()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
