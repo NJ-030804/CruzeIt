@@ -20,7 +20,6 @@ const AboutUs = () => {
       role: 'Software Architect',
       image: assets.noel,
       social: {
-        linkedin: 'https://linkedin.com',
         github: 'https://github.com/Miaowty'
       }
     },
@@ -29,7 +28,6 @@ const AboutUs = () => {
       role: 'Frontend Developer',
       image: assets.lance,
       social: {
-        linkedin: 'https://linkedin.com',
         github: 'https://github.com/draknuight'
       }
     },
@@ -38,7 +36,6 @@ const AboutUs = () => {
       role: 'Backend Developer',
       image: assets.gio,
       social: {
-        linkedin: 'https://linkedin.com',
         github: 'https://github.com/kramogs-bug'
       }
     },
@@ -47,7 +44,6 @@ const AboutUs = () => {
       role: 'QA Engineer',
       image: assets.ayen,
       social: {
-        linkedin: 'https://linkedin.com',
         github: 'https://github.com/ayencha1412-ux'
       }
     }
