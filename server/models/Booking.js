@@ -8,6 +8,12 @@ const bookingSchema = new mongoose.Schema(
     owner:            { type: ObjectId, ref: "User", required: true},
     pickupDate:       { type: Date,   required: true },
     returnDate:       { type: Date,   required: true },
+    paymentMethod: {
+    type: String,
+    enum: ['cash', 'card', 'gcash', 'maya'],
+    required: true,
+    default: 'cash'
+  },
     status:           { 
       type: String,   
       enum: ["Pending", "Confirmed", "Cancelled", "Completed"], 
