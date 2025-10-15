@@ -54,7 +54,24 @@ export const checkAvailabilityofCar = async (req, res) => {
 export const createBooking = async (req, res) => {
     try {
         const {_id} = req.user;
-        const {carId, pickupDate, returnDate, contactNumber} = req.body;
+        const {carId, pickupDate, returnDate, contactNumber, paymentMethod} = req.body;
+
+        // Validate required fields
+        if (!carId || !pickupDate || !returnDate || !contactNumber || !paymentMethod) {
+            return res.json({
+                success: false, 
+                message: 'All fields are required including payment method'
+            });
+        }
+
+        // Validate payment method
+        const validPaymentMethods = ['cash', 'card', 'gcash', 'maya'];
+        if (!validPaymentMethods.includes(paymentMethod.toLowerCase())) {
+            return res.json({
+                success: false, 
+                message: 'Invalid payment method. Please select cash, card, gcash, or maya'
+            });
+        }
 
         // Validate dates
         const picked = new Date(pickupDate);
@@ -90,6 +107,7 @@ export const createBooking = async (req, res) => {
         const noOfDays = Math.ceil((returned - picked)/(1000*60*60*24))
         const price = carData.price_per_day * noOfDays;
 
+        // Create booking with payment method
         await Booking.create({
             car: carId,
             owner: carData.owner,
@@ -98,8 +116,10 @@ export const createBooking = async (req, res) => {
             returnDate,
             price,
             customerContact: contactNumber,
-            ownerContact: ownerPhone
+            ownerContact: ownerPhone,
+            paymentMethod: paymentMethod.toLowerCase() // Store in lowercase
         })
+        
         res.json({success: true, message: 'Booking created successfully'})
 
     } catch (error) {
@@ -129,7 +149,9 @@ export const getOwnerBookings = async (req, res) => {
             return res.json({success: false, message: 'You are not authorized to access this resource'})
         }
         const bookings = await Booking.find({owner: req.user._id})
-        .populate('car').select('-user.password').sort({createdAt: -1})
+        .populate('car')
+        .populate('user', 'name email username') // Populate user details for display
+        .sort({createdAt: -1})
         res.json({success: true, bookings})
     
     } catch (error) {
