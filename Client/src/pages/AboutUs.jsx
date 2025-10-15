@@ -9,7 +9,7 @@ const AboutUs = () => {
     {
       name: 'Noel Narte',
       role: 'Scrum Master',
-      image: assets.jm,
+      image: assets.noel,
       social: {
         github: 'https://github.com/NJ-030804'
       }
@@ -17,7 +17,7 @@ const AboutUs = () => {
     {
       name: 'Lance Barbosa',
       role: 'Software Architect',
-      image: assets.noel,
+      image: assets.lance,
       social: {
         github: 'https://github.com/Miaowty'
       }
@@ -25,7 +25,7 @@ const AboutUs = () => {
     {
       name: 'Gio Paulo Cuanan',
       role: 'Frontend Developer',
-      image: assets.lance,
+      image: assets.gio,
       social: {
         github: 'https://github.com/draknuight'
       }
@@ -33,7 +33,7 @@ const AboutUs = () => {
     {
       name: 'John Mark Valdez',
       role: 'Backend Developer',
-      image: assets.gio,
+      image: assets.jm,
       social: {
         github: 'https://github.com/kramogs-bug'
       }
