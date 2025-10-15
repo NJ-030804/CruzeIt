@@ -11,7 +11,6 @@ const AboutUs = () => {
       role: 'Scrum Master',
       image: assets.jm,
       social: {
-        linkedin: 'https://www.linkedin.com/in/noel-narte-jr-10816b332/',
         github: 'https://github.com/NJ-030804'
       }
     },
@@ -155,7 +154,7 @@ const AboutUs = () => {
                   whileHover={{ opacity: 1, y: 0 }}
                   className='absolute bottom-4 left-0 right-0 flex justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300'
                 >
-                  
+
                   <motion.a
                     href={member.social.github}
                     target="_blank"
