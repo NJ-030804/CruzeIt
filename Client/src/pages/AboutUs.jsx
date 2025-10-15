@@ -11,8 +11,8 @@ const AboutUs = () => {
       role: 'Scrum Master',
       image: assets.jm,
       social: {
-        linkedin: 'https://linkedin.com',
-        github: 'https://github.com'
+        linkedin: 'https://www.linkedin.com/in/noel-narte-jr-10816b332/',
+        github: 'https://github.com/NJ-030804'
       }
     },
     {
