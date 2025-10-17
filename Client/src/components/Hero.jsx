@@ -72,6 +72,7 @@ const Hero = () => {
               value={pickupLocation}
               onChange={handleLocationChange}
               onFocus={() => setIsDropdownOpen(true)}
+              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
               className="text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-400 focus:outline-primary focus:border-primary"
               placeholder="Please select or type"
             />
@@ -82,7 +83,7 @@ const Hero = () => {
                   <button
                     key={city}
                     type="button"
-                    onClick={() => handleSelectCity(city)}
+                    onMouseDown={() => handleSelectCity(city)}
                     className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
                   >
                     {city}
