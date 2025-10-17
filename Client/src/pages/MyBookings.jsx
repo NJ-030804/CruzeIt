@@ -24,6 +24,8 @@ const MyBookings = () => {
         icon: '🔐'
       })
       setLoading(false)
+    } else {
+      setLoading(true)
     }
   }, [user])
 
