@@ -20,13 +20,17 @@ const MyBookings = () => {
     try {
       setLoading(true)
       const { data } = await axios.get('/api/bookings/user')
+      console.log('Bookings response:', data)
       if (data.success) {
-        setBookings(data.bookings)
+        setBookings(data.bookings || [])
       } else {
         toast.error(data.message)
+        setBookings([])
       }
     } catch (error) {
+      console.error('Error fetching bookings:', error)
       toast.error(error.message)
+      setBookings([])
     } finally {
       setLoading(false)
     }
