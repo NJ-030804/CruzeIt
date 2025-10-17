@@ -58,6 +58,11 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showDropdown])
 
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setOpen(false)
+  }, [location.pathname])
+
   return (
     <motion.div
       initial={{ y: -20, opacity: 0 }}
@@ -111,7 +116,7 @@ const Navbar = () => {
           </button>
         </form>
 
-        <div className='flex max-sm:flex-col items-start sm:items-center gap-6'>
+        <div className='flex max-sm:flex-col items-start sm:items-center gap-6 max-sm:w-full'>
           <button 
             onClick={() => {
               isOwner ? navigate('/owner') : changeRole()
@@ -123,12 +128,12 @@ const Navbar = () => {
           </button>
 
           {user ? (
-            <div className="relative profile-dropdown">
+            <div className="relative profile-dropdown max-sm:w-full">
               {/* Profile Button with Picture */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center gap-2 cursor-pointer"
+                className="flex items-center gap-2 cursor-pointer max-sm:w-full"
               >
                 {user.image && user.image !== ' ' ? (
                   <img 
@@ -168,7 +173,7 @@ const Navbar = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50"
+                    className="absolute right-0 sm:right-0 max-sm:left-0 max-sm:right-auto mt-2 w-64 max-sm:w-full bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-[60]"
                   >
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-200">
@@ -184,7 +189,7 @@ const Navbar = () => {
                             {user.name?.charAt(0).toUpperCase()}
                           </div>
                         )}
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">{user.name}</p>
                           <p className="text-xs text-gray-500 truncate">{user.email}</p>
                           {user.authProvider === 'google' && (
@@ -207,8 +212,13 @@ const Navbar = () => {
                       onClick={() => {
                         logout()
                         setShowDropdown(false)
+                        setOpen(false)
                       }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2 touch-manipulation"
+                      style={{ 
+                        WebkitTapHighlightColor: 'transparent',
+                        userSelect: 'none'
+                      }}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
