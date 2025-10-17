@@ -66,7 +66,7 @@ const Newsletter = () => {
           type="submit"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.98 }}
-          className="md:px-12 px-8 h-full text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer rounded-md rounded-l-none whitespace-nowrap relative overflow-hidden"
+          className="md:px-12 px-8 h-full text-white bg-primary hover:bg-primary-dull transition-all cursor-pointer rounded-md rounded-l-none whitespace-nowrap relative overflow-hidden flex items-center justify-center"
         >
           <motion.span
             animate={isSubmitted ? { y: -50, opacity: 0 } : { y: 0, opacity: 1 }}
