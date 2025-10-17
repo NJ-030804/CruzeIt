@@ -295,6 +295,7 @@ const MyBookings = () => {
             className="mt-10 space-y-6"
           >
             {bookings.map((booking, index) => (
+              booking.car ? (
               <motion.div
                 layout
                 key={booking._id}
@@ -418,6 +419,7 @@ const MyBookings = () => {
                   </div>
                 </div>
               </motion.div>
+              ) : null
             ))}
           </motion.div>
         </AnimatePresence>
