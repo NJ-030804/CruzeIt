@@ -21,7 +21,7 @@ const MyBookings = () => {
     if (!user) {
       toast.error('Please log in or create an account to view your bookings', {
         duration: 4000,
-        icon: '🔒'
+        icon: '🔐'
       })
       setLoading(false)
     }
@@ -126,7 +126,7 @@ const MyBookings = () => {
   }
 
   // If user is not logged in, show login prompt
-  if (!user && !loading) {
+  if (!user) {
     return (
       <div className="px-6 md:px-16 lg:px-24 xl:px-32 2xl:px-48 mt-16 text-sm max-w-7xl mx-auto">
         <Title title="My Bookings" subTitle="View and manage all your car bookings" align="left" />
@@ -405,11 +405,7 @@ const MyBookings = () => {
                 <div className="md:col-span-1 flex flex-col justify-between gap-6 text-right">
                   <div>
                     <p className="text-gray-500 text-sm">Total Price</p>
-                    <h1
-                      className="text-2xl font-semibold text-primary"
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ repeat: Infinity, duration: 3 }}
-                    >
+                    <h1 className="text-2xl font-semibold text-primary">
                       {currency}
                       {booking.price}
                     </h1>
