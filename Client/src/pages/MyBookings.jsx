@@ -16,21 +16,9 @@ const MyBookings = () => {
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [actionType, setActionType] = useState('cancel') // 'cancel' or 'delete'
 
-  // Check if user is logged in
-  useEffect(() => {
-    if (!user) {
-      toast.error('Please log in or create an account to view your bookings', {
-        duration: 4000,
-        icon: '🔐'
-      })
-      setLoading(false)
-    } else {
-      setLoading(true)
-    }
-  }, [user])
-
   const fetchMyBookings = async () => {
     try {
+      setLoading(true)
       const { data } = await axios.get('/api/bookings/user')
       if (data.success) {
         setBookings(data.bookings)
@@ -44,8 +32,17 @@ const MyBookings = () => {
     }
   }
 
+  // Check if user is logged in and fetch bookings
   useEffect(() => {
-    if (user) fetchMyBookings()
+    if (!user) {
+      toast.error('Please log in or create an account to view your bookings', {
+        duration: 4000,
+        icon: '🔐'
+      })
+      setLoading(false)
+    } else {
+      fetchMyBookings()
+    }
   }, [user])
 
   // Check if booking can be cancelled
