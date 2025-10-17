@@ -5,11 +5,34 @@ import { motion, useScroll, useTransform } from 'motion/react'
 
 const Hero = () => {
   const [pickupLocation, setPickupLocation] = useState('')
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [filteredCities, setFilteredCities] = useState(cityList)
   const { pickupDate, setPickupDate, returnDate, setReturnDate, navigate } = useAppContext()
   
   // Scroll animation for the car
   const { scrollY } = useScroll()
   const carX = useTransform(scrollY, [0, 400], ['0%', '-150%'])
+
+  const handleLocationChange = (e) => {
+    const value = e.target.value
+    setPickupLocation(value)
+    setIsDropdownOpen(true)
+    
+    if (value.trim() === '') {
+      setFilteredCities(cityList)
+    } else {
+      setFilteredCities(
+        cityList.filter(city =>
+          city.toLowerCase().includes(value.toLowerCase())
+        )
+      )
+    }
+  }
+
+  const handleSelectCity = (city) => {
+    setPickupLocation(city)
+    setIsDropdownOpen(false)
+  }
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -40,22 +63,33 @@ const Hero = () => {
         className="flex flex-col md:flex-row items-start md:items-center justify-between py-4 px-6 rounded-xl md:rounded-full w-full max-w-[56rem] bg-white shadow-xl mx-4"
       >
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 w-full md:ml-6">
-          {/* Pickup Location */}
-          <div className="flex flex-col items-start gap-2 w-full md:w-auto">
+          {/* Pickup Location - Custom Dropdown */}
+          <div className="flex flex-col items-start gap-2 w-full md:w-auto relative">
             <label className="text-sm font-medium text-gray-700">Pickup Location</label>
             <input
-              list="pickup-locations"
+              type="text"
               required
               value={pickupLocation}
-              onChange={(e) => setPickupLocation(e.target.value)}
+              onChange={handleLocationChange}
+              onFocus={() => setIsDropdownOpen(true)}
               className="text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-400 focus:outline-primary focus:border-primary"
               placeholder="Please select or type"
             />
-            <datalist id="pickup-locations">
-              {cityList.map((city) => (
-                <option key={city} value={city} />
-              ))}
-            </datalist>
+            
+            {isDropdownOpen && filteredCities.length > 0 && (
+              <div className="absolute top-full left-0 mt-1 w-full md:w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto">
+                {filteredCities.map((city) => (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => handleSelectCity(city)}
+                    className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Pickup Date */}
