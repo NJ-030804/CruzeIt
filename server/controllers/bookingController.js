@@ -88,6 +88,14 @@ export const createBooking = async (req, res) => {
             return res.json({success: false, message: 'Car not found'})
         }
 
+        // CHECK: Prevent car owner from booking their own car
+        if(carData.owner.toString() === _id.toString()){
+            return res.json({
+                success: false, 
+                message: 'You cannot book your own car. Car owners are not allowed to book their own vehicles.'
+            })
+        }
+
         // CHECK: Ensure the car is marked as available by owner
         if(!carData.isAvailable){
             return res.json({success: false, message: 'This car is currently unavailable for booking'})
