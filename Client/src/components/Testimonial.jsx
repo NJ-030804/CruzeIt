@@ -636,58 +636,60 @@ const Testimonial = () => {
           )}
 
           {/* Carousel Container */}
-          <div className="overflow-hidden">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div 
-                key={currentPage}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 }
-                }}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-              >
-                {getCurrentTestimonials().map((testimonial) => (
-                  <motion.div 
-                    key={testimonial._id}
-                    whileHover={{ 
-                      y: -8, 
-                      scale: 1.02,
-                      transition: { duration: 0.3 }
-                    }}
-                    className="bg-white p-6 rounded-xl shadow-lg cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3">
-                      <motion.div
-                        whileHover={{ scale: 1.1, rotate: 5 }}
-                        transition={{ duration: 0.3 }}
-                        className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dull flex items-center justify-center text-white font-bold text-xl"
-                      >
-                        {testimonial.name.charAt(0).toUpperCase()}
-                      </motion.div>
-                      <div>
-                        <p className="text-lg font-semibold">{testimonial.name}</p>
-                        <p className="text-gray-400 text-sm">{formatDate(testimonial.createdAt)}</p>
+          <div className="overflow-visible px-4 py-4">
+            <div className="overflow-hidden">
+              <AnimatePresence initial={false} custom={direction} mode="wait">
+                <motion.div 
+                  key={currentPage}
+                  custom={direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 }
+                  }}
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                  {getCurrentTestimonials().map((testimonial) => (
+                    <motion.div 
+                      key={testimonial._id}
+                      whileHover={{ 
+                        y: -8, 
+                        scale: 1.02,
+                        transition: { duration: 0.3 }
+                      }}
+                      className="bg-white p-6 rounded-xl shadow-lg cursor-pointer"
+                    >
+                      <div className="flex items-center gap-3">
+                        <motion.div
+                          whileHover={{ scale: 1.1, rotate: 5 }}
+                          transition={{ duration: 0.3 }}
+                          className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dull flex items-center justify-center text-white font-bold text-xl"
+                        >
+                          {testimonial.name.charAt(0).toUpperCase()}
+                        </motion.div>
+                        <div>
+                          <p className="text-lg font-semibold">{testimonial.name}</p>
+                          <p className="text-gray-400 text-sm">{formatDate(testimonial.createdAt)}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-1 mt-4">
-                      {Array(testimonial.rating).fill(0).map((_, starIndex) => (
-                        <StarIcon key={starIndex} filled={true} className="w-5 h-5 text-yellow-400" />
-                      ))}
-                    </div>
+                      <div className="flex items-center gap-1 mt-4">
+                        {Array(testimonial.rating).fill(0).map((_, starIndex) => (
+                          <StarIcon key={starIndex} filled={true} className="w-5 h-5 text-yellow-400" />
+                        ))}
+                      </div>
 
-                    <p className="text-gray-600 mt-4 leading-relaxed">
-                      "{testimonial.testimonial}"
-                    </p>
-                  </motion.div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
+                      <p className="text-gray-600 mt-4 leading-relaxed">
+                        "{testimonial.testimonial}"
+                      </p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Carousel Indicators - Only show if more than 3 reviews */}
