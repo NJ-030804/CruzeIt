@@ -43,8 +43,8 @@ const Banner = () => {
       className='relative flex flex-col md:flex-row md:items-center items-center justify-between px-8 md:px-14 py-12 md:py-10 bg-gradient-to-r from-[#344E41] to-[#DAD7CD] max-w-8xl min-h-[280px] mx-3 md:mx-auto rounded-2xl overflow-hidden shadow-2xl'
     >
       {/* Decorative Background Elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#344E41]/20 rounded-full blur-3xl"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#344E41]/20 rounded-full blur-3xl pointer-events-none"></div>
       
       <motion.div 
         initial={{ opacity: 0, x: -50 }}
@@ -130,16 +130,20 @@ const Banner = () => {
           whileHover={{ scale: 1.05, y: -2, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
           whileTap={{ scale: 0.98 }}
           onClick={handleListCarClick}
-          className='group relative px-8 py-3.5 bg-white hover:bg-slate-50 transition-all text-[#344E41] rounded-xl text-base font-semibold cursor-pointer shadow-xl overflow-hidden'
+          className='group relative px-8 py-3.5 bg-white hover:bg-slate-50 transition-all text-[#344E41] rounded-xl text-base font-semibold cursor-pointer shadow-xl overflow-hidden touch-manipulation active:scale-95'
+          style={{ 
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none'
+          }}
         >
-          <span className="relative z-10 flex items-center gap-2">
+          <span className="relative z-10 flex items-center justify-center gap-2">
             List Your Car
             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </span>
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none"></div>
         </motion.button>
       </motion.div>
    
@@ -152,7 +156,7 @@ const Banner = () => {
           delay: 0.3, 
           ease: [0.22, 1, 0.36, 1]
         }}
-        className="relative z-10 w-full max-w-md ml-auto mt-8 md:mt-0"
+        className="relative z-0 w-full max-w-md ml-auto mt-8 md:mt-0 pointer-events-none"
       >
         {/* Glow effect behind car */}
         <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl scale-150"></div>
