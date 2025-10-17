@@ -170,9 +170,15 @@ const Testimonial = () => {
   // Handle write review button click
   const handleWriteReviewClick = () => {
     if (!user) {
-      toast.error('Please log in or create an account to write a review', {
+      toast.error('Please log in or create an account to list your car', {
         duration: 4000,
-        icon: ''
+        icon: '',
+        style: {
+          borderRadius: '12px',
+          background: '#344E41',
+          color: '#fff',
+          padding: '16px',
+        },
       })
       return
     }
