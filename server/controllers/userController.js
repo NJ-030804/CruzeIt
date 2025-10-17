@@ -2,6 +2,7 @@ import User from "../models/User.js"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import Car from "../models/Car.js";
+import Booking from "../models/Booking.js";
 
 const generateToken = (userId) => {
     const payload = { id: userId };  // ← Changed to object with id property
@@ -14,7 +15,7 @@ export const registerUser = async (req, res) => {
         const { name, email, password } = req.body
 
         if (!name || !email || !password || password.length < 8) {
-            return res.json({success: false, message: ' Minimum Password is 8-Character'})
+            return res.json({success: false, message: ' Fill all the fields'})
         }
 
         const userExists = await User.findOne({ email })
@@ -98,3 +99,65 @@ export const getCars = async (req, res) => {
     }
 
 }
+
+export const deleteAccount = async (req, res) => {
+    try {
+        const { _id, role } = req.user;
+
+        const user = await User.findById(_id);
+        
+        if (!user) {
+            return res.json({ success: false, message: 'User not found' });
+        }
+
+        // If user is an owner, check for active bookings on their cars
+        if (role === 'owner') {
+            const activeBookings = await Booking.find({
+                owner: _id,
+                status: { $in: ['Pending', 'Confirmed'] }
+            });
+
+            if (activeBookings.length > 0) {
+                return res.json({
+                    success: false,
+                    message: 'Cannot delete account. You have active bookings. Please complete or cancel all bookings first.'
+                });
+            }
+
+            // Delete all cars owned by the user
+            await Car.deleteMany({ owner: _id });
+        }
+
+        // Check for active bookings as a customer
+        const userActiveBookings = await Booking.find({
+            user: _id,
+            status: { $in: ['Pending', 'Confirmed'] }
+        });
+
+        if (userActiveBookings.length > 0) {
+            return res.json({
+                success: false,
+                message: 'Cannot delete account. You have active bookings. Please cancel all your bookings first.'
+            });
+        }
+
+        // Delete all bookings
+        await Booking.deleteMany({ user: _id });
+        await Booking.deleteMany({ owner: _id });
+
+        // Delete the user account
+        await User.findByIdAndDelete(_id);
+
+        res.json({ 
+            success: true, 
+            message: 'Account deleted successfully' 
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        res.json({ 
+            success: false, 
+            message: error.message 
+        });
+    }
+};
