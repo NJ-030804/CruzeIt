@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
@@ -13,7 +12,6 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        // Password is now optional for Google OAuth users
         required: function() {
             return !this.googleId; // Required only if not a Google user
         }
@@ -21,7 +19,7 @@ const userSchema = new mongoose.Schema({
     googleId: {
         type: String,
         unique: true,
-        sparse: true, // Allows null values and creates index only for non-null values
+        sparse: true, 
     },
     role: {
         type: String,
@@ -40,6 +38,10 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         default: ''
+    },
+    verified: { 
+        type: Boolean,
+        default: false 
     }
 }, { timestamps: true })
 
