@@ -5,18 +5,17 @@ import { assets } from '../../assets/assets'
 import { useAppContext } from '../../context/AppContext'
 import {toast} from 'react-hot-toast'
 
+// Default seating capacities for each category
+const categorySeatingCapacity = {
+  'MPV': 7,
+  'SUV': 7,
+  'Sedan': 5,
+  'Van': 12
+}
 
 const AddCar = () => {
 
   const {axios, currency} = useAppContext()
-
-  // Default seating capacities for each category
-  const categorySeatingCapacity = {
-    'MPV': 7,
-    'SUV': 7,
-    'Sedan': 5,
-    'Van': 12
-  }
 
   const [image, setImage] = useState(null)
   const [car, setCar] = useState({
