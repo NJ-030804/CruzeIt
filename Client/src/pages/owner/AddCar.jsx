@@ -27,6 +27,13 @@ const AddCar = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
 
+  const categorySeatingMap = {
+    'MPV': 7,
+    'SUV': 5,
+    'Sedan': 5,
+    'Van': 8
+  }
+
   const onSubmitHandler = async (e) => {
     e.preventDefault()
     if(isLoading) return null
@@ -85,6 +92,15 @@ const AddCar = () => {
         ease: "easeOut"
       }
     }
+  }
+
+  const handleCategoryChange = (e) => {
+    const selectedCategory = e.target.value
+    setCar({ 
+      ...car, 
+      category: selectedCategory,
+      seating_capacity: categorySeatingMap[selectedCategory] || 0
+    })
   }
 
   return (
@@ -252,8 +268,8 @@ const AddCar = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
             <select
               value={car.category}
-              onChange={(e) => setCar({ ...car, category: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer"
+              onChange={handleCategoryChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
             >
               <option value="">Select</option>
               <option value="MPV">MPV</option>
@@ -271,7 +287,7 @@ const AddCar = () => {
             <select
               value={car.transmission}
               onChange={(e) => setCar({ ...car, transmission: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
             >
               <option value="">Select</option>
               <option value="Automatic">Automatic</option>
@@ -285,7 +301,7 @@ const AddCar = () => {
             <select
               value={car.fuel_type}
               onChange={(e) => setCar({ ...car, fuel_type: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
             >
               <option value="">Select</option>
               <option value="Gas">Gas</option>
@@ -302,9 +318,14 @@ const AddCar = () => {
               type="number"
               placeholder="e.g. 5"
               required
+              maxLength="2"
+              max="99"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
               value={car.seating_capacity}
-              onChange={(e) => setCar({ ...car, seating_capacity: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value.slice(0, 2)
+                setCar({ ...car, seating_capacity: value })
+              }}
             />
           </motion.div>
         </motion.div>
