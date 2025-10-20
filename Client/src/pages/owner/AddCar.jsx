@@ -1,10 +1,17 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Title from '../../components/owner/Title'
 import { assets } from '../../assets/assets'
 import { useAppContext } from '../../context/AppContext'
 import {toast} from 'react-hot-toast'
 
+// Default seating capacities for each category
+const categorySeatingCapacity = {
+  'MPV': 7,
+  'SUV': 7,
+  'Sedan': 5,
+  'Van': 12
+}
 
 const AddCar = () => {
 
@@ -27,12 +34,12 @@ const AddCar = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [focusedField, setFocusedField] = useState(null)
 
-  const categorySeatingMap = {
-    'MPV': 7,
-    'SUV': 5,
-    'Sedan': 5,
-    'Van': 8
-  }
+  // Auto-fill seating capacity when category changes
+  useEffect(() => {
+    if (car.category && categorySeatingCapacity[car.category]) {
+      setCar(prev => ({ ...prev, seating_capacity: categorySeatingCapacity[car.category] }))
+    }
+  }, [car.category])
 
   const onSubmitHandler = async (e) => {
     e.preventDefault()
@@ -92,15 +99,6 @@ const AddCar = () => {
         ease: "easeOut"
       }
     }
-  }
-
-  const handleCategoryChange = (e) => {
-    const selectedCategory = e.target.value
-    setCar({ 
-      ...car, 
-      category: selectedCategory,
-      seating_capacity: categorySeatingMap[selectedCategory] || 0
-    })
   }
 
   return (
@@ -208,7 +206,13 @@ const AddCar = () => {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
               value={car.brand}
-              onChange={(e) => setCar({ ...car, brand: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value
+                // Only allow letters and spaces
+                if (/^[A-Za-z\s]*$/.test(value)) {
+                  setCar({ ...car, brand: value })
+                }
+              }}
               onFocus={() => setFocusedField('brand')}
               onBlur={() => setFocusedField(null)}
               animate={{ 
@@ -228,7 +232,13 @@ const AddCar = () => {
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
               value={car.model}
-              onChange={(e) => setCar({ ...car, model: e.target.value })}
+              onChange={(e) => {
+                const value = e.target.value
+                // Only allow letters and spaces
+                if (/^[A-Za-z\s]*$/.test(value)) {
+                  setCar({ ...car, model: value })
+                }
+              }}
               onFocus={() => setFocusedField('model')}
               onBlur={() => setFocusedField(null)}
               animate={{ 
@@ -247,7 +257,7 @@ const AddCar = () => {
               placeholder="2025"
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-              value={car.year}
+              value={car.year || ''}
               onChange={(e) => setCar({ ...car, year: e.target.value })}
             />
           </motion.div>
@@ -259,24 +269,44 @@ const AddCar = () => {
               placeholder="e.g. 1000"
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-              value={car.price_per_day}
+              value={car.price_per_day || ''}
               onChange={(e) => setCar({ ...car, price_per_day: e.target.value })}
             />
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.01 }}>
             <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-            <select
-              value={car.category}
-              onChange={handleCategoryChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
-            >
-              <option value="">Select</option>
-              <option value="MPV">MPV</option>
-              <option value="SUV">SUV</option>
-              <option value="Sedan">Sedan</option>
-              <option value="Van">Van</option>
-            </select>
+            <div className="relative">
+              <select
+                value={car.category}
+                onChange={(e) => setCar({ ...car, category: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none"
+                style={{ paddingRight: '2.5rem' }}
+              >
+                <option value="">Select</option>
+                <option value="MPV">MPV</option>
+                <option value="SUV">SUV</option>
+                <option value="Sedan">Sedan</option>
+                <option value="Van">Van</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {car.category && (
+              <motion.p 
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-xs text-green-600 mt-1.5 flex items-center gap-1"
+              >
+                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                Auto-filled: {categorySeatingCapacity[car.category]} seats
+              </motion.p>
+            )}
           </motion.div>
         </motion.div>
 
@@ -284,32 +314,48 @@ const AddCar = () => {
         <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-2xl">
           <motion.div whileHover={{ scale: 1.01 }}>
             <label className="block text-sm font-medium text-gray-700 mb-2">Transmission</label>
-            <select
-              value={car.transmission}
-              onChange={(e) => setCar({ ...car, transmission: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
-            >
-              <option value="">Select</option>
-              <option value="Automatic">Automatic</option>
-              <option value="Manual">Manual</option>
-              <option value="Semi-Automatic">Semi-Automatic</option>
-            </select>
+            <div className="relative">
+              <select
+                value={car.transmission}
+                onChange={(e) => setCar({ ...car, transmission: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none"
+                style={{ paddingRight: '2.5rem' }}
+              >
+                <option value="">Select</option>
+                <option value="Automatic">Automatic</option>
+                <option value="Manual">Manual</option>
+                <option value="Semi-Automatic">Semi-Automatic</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.01 }}>
             <label className="block text-sm font-medium text-gray-700 mb-2">Fuel Type</label>
-            <select
-              value={car.fuel_type}
-              onChange={(e) => setCar({ ...car, fuel_type: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none bg-white"
-            >
-              <option value="">Select</option>
-              <option value="Gas">Gas</option>
-              <option value="Diesel">Diesel</option>
-              <option value="Petrol">Petrol</option>
-              <option value="Electric">Electric</option>
-              <option value="Hybrid">Hybrid</option>
-            </select>
+            <div className="relative">
+              <select
+                value={car.fuel_type}
+                onChange={(e) => setCar({ ...car, fuel_type: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all cursor-pointer appearance-none"
+                style={{ paddingRight: '2.5rem' }}
+              >
+                <option value="">Select</option>
+                <option value="Gas">Gas</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.01 }}>
@@ -318,13 +364,15 @@ const AddCar = () => {
               type="number"
               placeholder="e.g. 5"
               required
-              maxLength="2"
+              min="1"
               max="99"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
-              value={car.seating_capacity}
+              value={car.seating_capacity || ''}
               onChange={(e) => {
-                const value = e.target.value.slice(0, 2)
-                setCar({ ...car, seating_capacity: value })
+                const value = e.target.value
+                if (value === '' || (Number(value) >= 1 && Number(value) <= 99 && value.length <= 2)) {
+                  setCar({ ...car, seating_capacity: value })
+                }
               }}
             />
           </motion.div>
