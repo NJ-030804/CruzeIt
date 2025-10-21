@@ -170,7 +170,7 @@ export const verifyRegister = async (req, res) => {
             success: true, 
             token,
             user: userData,
-            message: "Account created successfully! Welcome to CruzIt!" 
+            message: "Account created successfully! Welcome to CruzeIt!" 
         });
 
     } catch (error) {
