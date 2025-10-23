@@ -14,9 +14,7 @@ const generateToken = (userId) => {
     })
 }
 
-// ============================================
 // Send verification code
-// ============================================
 export const sendVerification = async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -102,9 +100,7 @@ export const sendVerification = async (req, res) => {
     }
 };
 
-// ============================================
 // Verify code and complete registration
-// ============================================
 export const verifyRegister = async (req, res) => {
     try {
         const { email, code } = req.body;
@@ -182,9 +178,7 @@ export const verifyRegister = async (req, res) => {
     }
 };
 
-// ============================================
 // Resend verification code
-// ============================================
 export const resendVerification = async (req, res) => {
     try {
         const { email } = req.body;
@@ -242,9 +236,7 @@ export const resendVerification = async (req, res) => {
     }
 };
 
-// ============================================
 // User login
-// ============================================
 export const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body
@@ -297,9 +289,7 @@ export const loginUser = async (req, res) => {
     }
 }
 
-// ============================================
 // Get user data
-// ============================================
 export const getUserData = async (req, res) => {
     try {
         const { user } = req;
@@ -337,9 +327,7 @@ export const getCars = async (req, res) => {
     }
 }
 
-// ============================================
 // Delete account with transactions
-// ============================================
 export const deleteAccount = async (req, res) => {
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -419,10 +407,6 @@ export const deleteAccount = async (req, res) => {
     }
 }
 
-// ============================================
-// DEPRECATED: Direct registration (kept for backward compatibility)
-// Use sendVerification + verifyRegister instead
-// ============================================
 export const registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body
@@ -481,4 +465,57 @@ export const registerUser = async (req, res) => {
             message: 'Server error during registration'
         })
     }
+}
+// Update user role to owner
+export const updateUserRole = async (req, res) => {
+  try {
+    const { role } = req.body
+    const userId = req.user._id // From protect middleware
+    
+    // Validate role
+    if (!role || !['user', 'owner'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role. Must be either "user" or "owner"'
+      })
+    }
+    
+    // Find and update user
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true } // Return updated document
+    ).select('-password')
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+
+    // Format user data to match the structure used throughout the app
+    const userData = {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      image: user.image,
+      phone: user.phone
+    }
+    
+    console.log('✅ User role updated to:', role);
+    
+    res.json({
+      success: true,
+      message: `Role updated to ${role} successfully!`,
+      user: userData // Now matches the format from login/register
+    })
+  } catch (error) {
+    console.error('❌ Error updating user role:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update role. Please try again.'
+    })
+  }
 }
