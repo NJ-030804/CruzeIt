@@ -10,6 +10,7 @@ import bookingRouter from "./routes/bookingRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import passportConfig from "./configs/passport.js";
 import testimonialRoute from './routes/testimonialRoute.js';
+import moderatorRoute from './routes/moderatorRoute.js'
 
 const app = express();
 
@@ -81,7 +82,7 @@ app.use('/api/user', userRouter);
 app.use('/api/owner', ownerRouter);
 app.use('/api/bookings', bookingRouter);
 app.use('/api/testimonials', testimonialRoute);
-
+app.use('/api/moderator', moderatorRoute)
 // Auth Routes (Google OAuth)
 app.use('/auth', authRouter);
 
