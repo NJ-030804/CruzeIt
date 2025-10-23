@@ -36,16 +36,18 @@ const Testimonial = () => {
   const [loading, setLoading] = useState(true)
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [showFilterMenu, setShowFilterMenu] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteId, setDeleteId] = useState(null)
+  const [showReportModal, setShowReportModal] = useState(false)
+  const [reportId, setReportId] = useState(null)
   const [formData, setFormData] = useState({
     rating: 0,
     testimonial: ''
   })
   const [hoveredRating, setHoveredRating] = useState(0)
 
-  // Carousel state
-  const [currentPage, setCurrentPage] = useState(0)
-  const [direction, setDirection] = useState(0)
-  const itemsPerPage = 3
+  // Removed carousel state - now showing all reviews
 
   // Enhanced bad words list for filtering
   const badWords = [
@@ -57,28 +59,24 @@ const Testimonial = () => {
     'inutil', 'walangya', 'putragis', 'pucha', 'buwisit', 'walanghiya'
   ]
 
-  // Enhanced function to normalize text (remove numbers and special characters)
   const normalizeText = (text) => {
     return text
       .toLowerCase()
-      .replace(/[0-9]/g, '') // Remove all numbers
-      .replace(/[@#$%^&*()_+=\[\]{};':"\\|,.<>?]/g, '') // Remove special characters
-      .replace(/\s+/g, '') // Remove spaces
+      .replace(/[0-9]/g, '')
+      .replace(/[@#$%^&*()_+=\[\]{};':"\\|,.<>?]/g, '')
+      .replace(/\s+/g, '')
   }
 
-  // Enhanced function to check if text contains bad words (with leet speak detection)
   const containsBadWords = (text) => {
     const normalizedText = normalizeText(text)
     
     return badWords.some(word => {
       const normalizedWord = normalizeText(word)
       
-      // Check direct match
       if (normalizedText.includes(normalizedWord)) {
         return true
       }
       
-      // Check with common leet speak replacements
       const leetVariations = text
         .toLowerCase()
         .replace(/[0]/g, 'o')
@@ -96,15 +94,12 @@ const Testimonial = () => {
     })
   }
 
-  // Function to censor bad words
   const censorBadWords = (text) => {
     let censoredText = text
     const normalizedInput = normalizeText(text)
     
     badWords.forEach(word => {
       const normalizedWord = normalizeText(word)
-      
-      // Create a regex that matches the word with any numbers/special chars in between
       const chars = word.split('')
       const pattern = chars.join('[0-9@#$%^&*()_+=\\[\\]{};\':"\\\\|,.<>?]*')
       const regex = new RegExp(pattern, 'gi')
@@ -115,13 +110,11 @@ const Testimonial = () => {
     return censoredText
   }
 
-  // Fetch testimonials from database
   const fetchTestimonials = async () => {
     try {
       setLoading(true)
       const { data } = await axios.get('/api/testimonials/latest')
       if (data.success) {
-        // Censor bad words in testimonials
         const censoredTestimonials = data.testimonials.map(testimonial => ({
           ...testimonial,
           testimonial: censorBadWords(testimonial.testimonial),
@@ -141,7 +134,6 @@ const Testimonial = () => {
     fetchTestimonials()
   }, [])
 
-  // Filter testimonials by rating
   useEffect(() => {
     if (selectedFilter === 'all') {
       setFilteredTestimonials(testimonials)
@@ -149,28 +141,13 @@ const Testimonial = () => {
       const rating = parseInt(selectedFilter)
       setFilteredTestimonials(testimonials.filter(t => t.rating === rating))
     }
-    setCurrentPage(0) // Reset to first page when filter changes
   }, [selectedFilter, testimonials])
 
-  // Calculate total pages
-  const totalPages = Math.ceil(filteredTestimonials.length / itemsPerPage)
+  // Removed auto-slide effect and pagination
 
-  // Auto-slide effect
-  useEffect(() => {
-    if (filteredTestimonials.length <= itemsPerPage) return
-    
-    const timer = setInterval(() => {
-      setDirection(1)
-      setCurrentPage((prev) => (prev + 1) % totalPages)
-    }, 5000) // Auto-slide every 5 seconds
-    
-    return () => clearInterval(timer)
-  }, [filteredTestimonials.length, totalPages, itemsPerPage])
-
-  // Handle write review button click
   const handleWriteReviewClick = () => {
     if (!user) {
-      toast.error('Please log in or create an account to list your car', {
+      toast.error('Please log in or create an account to write a review', {
         duration: 4000,
         icon: '',
         style: {
@@ -183,49 +160,123 @@ const Testimonial = () => {
       return
     }
     setShowForm(!showForm)
+    setEditingId(null)
+    setFormData({ rating: 0, testimonial: '' })
   }
 
-  // Submit new testimonial
   const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!user) {
-      toast.error('Please log in to submit a review', {
-        duration: 4000,
-        icon: ''
-      })
+      toast.error('Please log in to submit a review')
       return
     }
 
     if (formData.rating > 0 && formData.testimonial) {
-      // Check for bad words before submitting
       if (containsBadWords(formData.testimonial)) {
-        toast.error('Please avoid using inappropriate language in your review. This includes variations with numbers or special characters (e.g., "pu74ng").')
+        toast.error('Please avoid using inappropriate language in your review.')
         return
       }
 
       try {
-        const { data } = await axios.post('/api/testimonials/create', {
-          name: user.name, // Use logged-in user's name
-          rating: formData.rating,
-          testimonial: formData.testimonial
-        })
-        
-        if (data.success) {
-          toast.success('Thank you for your review!')
+        if (editingId) {
+          // Update existing review
+          const { data } = await axios.put(`/api/testimonials/update/${editingId}`, {
+            rating: formData.rating,
+            testimonial: formData.testimonial
+          })
           
-          // Reset form
-          setFormData({ rating: 0, testimonial: '' })
-          setShowForm(false)
-          
-          // Refresh testimonials to show the new one
-          fetchTestimonials()
+          if (data.success) {
+            toast.success('Review updated successfully!')
+            setEditingId(null)
+          } else {
+            toast.error(data.message || 'Failed to update review')
+          }
         } else {
-          toast.error(data.message || 'Failed to submit review')
+          // Create new review
+          const { data } = await axios.post('/api/testimonials/create', {
+            name: user.name,
+            rating: formData.rating,
+            testimonial: formData.testimonial
+          })
+          
+          if (data.success) {
+            toast.success('Thank you for your review!')
+          } else {
+            toast.error(data.message || 'Failed to submit review')
+          }
         }
+        
+        setFormData({ rating: 0, testimonial: '' })
+        setShowForm(false)
+        fetchTestimonials()
       } catch (error) {
         toast.error(error.response?.data?.message || 'Error submitting review')
       }
+    }
+  }
+
+  const handleEdit = (testimonial) => {
+    setEditingId(testimonial._id)
+    setFormData({
+      rating: testimonial.rating,
+      testimonial: testimonial.testimonial
+    })
+    setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const handleDeleteClick = (id) => {
+    setDeleteId(id)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = async () => {
+    try {
+      const { data } = await axios.delete(`/api/testimonials/delete/${deleteId}`)
+      
+      if (data.success) {
+        toast.success('Review deleted successfully!')
+        fetchTestimonials()
+      } else {
+        toast.error(data.message || 'Failed to delete review')
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error deleting review')
+    } finally {
+      setShowDeleteModal(false)
+      setDeleteId(null)
+    }
+  }
+
+  const handleReportClick = (id) => {
+    if (!user) {
+      toast.error('Please log in to report a review')
+      return
+    }
+    setReportId(id)
+    setShowReportModal(true)
+  }
+
+  const confirmReport = async () => {
+    try {
+      const { data } = await axios.post(`/api/testimonials/report/${reportId}`)
+      
+      if (data.success) {
+        if (data.deleted) {
+          toast.success('Review has been removed due to multiple reports')
+          fetchTestimonials()
+        } else {
+          toast.success('Review reported successfully. Thank you for your feedback.')
+        }
+      } else {
+        toast.error(data.message || 'Failed to report review')
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Error reporting review')
+    } finally {
+      setShowReportModal(false)
+      setReportId(null)
     }
   }
 
@@ -233,7 +284,6 @@ const Testimonial = () => {
     setFormData({ ...formData, rating })
   }
 
-  // Format date helper - now shows minutes and hours
   const formatDate = (dateString) => {
     const date = new Date(dateString)
     const now = new Date()
@@ -248,40 +298,6 @@ const Testimonial = () => {
     if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) !== 1 ? 's' : ''} ago`
     return `${Math.floor(diffDays / 30)} month${Math.floor(diffDays / 30) !== 1 ? 's' : ''} ago`
-  }
-
-  // Navigation handlers
-  const handlePrev = () => {
-    setDirection(-1)
-    setCurrentPage((prev) => (prev === 0 ? totalPages - 1 : prev - 1))
-  }
-
-  const handleNext = () => {
-    setDirection(1)
-    setCurrentPage((prev) => (prev + 1) % totalPages)
-  }
-
-  // Get current page testimonials
-  const getCurrentTestimonials = () => {
-    const startIndex = currentPage * itemsPerPage
-    const endIndex = startIndex + itemsPerPage
-    return filteredTestimonials.slice(startIndex, endIndex)
-  }
-
-  // Slide variants for animation
-  const slideVariants = {
-    enter: (direction) => ({
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0
-    }),
-    center: {
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction) => ({
-      x: direction > 0 ? -1000 : 1000,
-      opacity: 0
-    })
   }
 
   return (
@@ -299,7 +315,6 @@ const Testimonial = () => {
         </p>
       </motion.div>
 
-      {/* Action Buttons */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -307,7 +322,6 @@ const Testimonial = () => {
         transition={{ duration: 0.6 }}
         className="flex flex-wrap justify-center gap-4 mb-12"
       >
-        {/* Write Review Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -315,10 +329,9 @@ const Testimonial = () => {
           className="bg-primary text-white px-8 py-3 rounded-lg font-medium shadow-lg hover:bg-primary-dull transition-colors flex items-center gap-2"
         >
           <StarIcon filled={true} className="w-5 h-5" />
-          {showForm ? 'Cancel' : 'Write a Review'}
+          {showForm ? 'Cancel' : editingId ? 'Cancel Edit' : 'Write a Review'}
         </motion.button>
 
-        {/* Filter Dropdown */}
         <div className="relative">
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -330,7 +343,6 @@ const Testimonial = () => {
             Filter by Rating
           </motion.button>
 
-          {/* Filter Menu */}
           <AnimatePresence>
             {showFilterMenu && (
               <motion.div
@@ -375,7 +387,6 @@ const Testimonial = () => {
         </div>
       </motion.div>
 
-      {/* Active Filter Display */}
       {selectedFilter !== 'all' && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -396,7 +407,6 @@ const Testimonial = () => {
         </motion.div>
       )}
 
-      {/* Login Required Message - Show when not logged in and form is attempted */}
       {!user && showForm && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -405,7 +415,6 @@ const Testimonial = () => {
           className="max-w-2xl mx-auto mb-12"
         >
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-            {/* Lock Icon */}
             <motion.div
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -475,44 +484,10 @@ const Testimonial = () => {
                 Cancel
               </motion.button>
             </motion.div>
-
-            {/* Decorative elements */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              transition={{ delay: 0.6 }}
-              className="mt-8 grid grid-cols-3 gap-6 text-gray-400"
-            >
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                  </svg>
-                </div>
-                <p className="text-xs">Rate Service</p>
-              </div>
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                </div>
-                <p className="text-xs">Share Feedback</p>
-              </div>
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 bg-gray-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <p className="text-xs">Help Others</p>
-              </div>
-            </motion.div>
           </div>
         </motion.div>
       )}
 
-      {/* Review Form - Only for logged in users */}
       <AnimatePresence>
         {showForm && user && (
           <motion.form
@@ -523,10 +498,11 @@ const Testimonial = () => {
             onSubmit={handleSubmit}
             className="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-xl overflow-hidden"
           >
-            <h3 className="text-2xl font-bold mb-6">Share Your Experience</h3>
+            <h3 className="text-2xl font-bold mb-6">
+              {editingId ? 'Edit Your Review' : 'Share Your Experience'}
+            </h3>
             
             <div className="space-y-6">
-              {/* Display User Name (Read-only) */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Your Name
@@ -539,7 +515,6 @@ const Testimonial = () => {
                 </p>
               </div>
 
-              {/* Rating Input */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Rating *
@@ -569,7 +544,6 @@ const Testimonial = () => {
                 </div>
               </div>
 
-              {/* Testimonial Input */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Your Review *
@@ -583,138 +557,112 @@ const Testimonial = () => {
                   required
                 />
                 <p className="text-xs text-gray-500 mt-2">
-                  Please keep your review respectful and appropriate. Inappropriate language including variations with numbers or special characters (e.g., "pu74ng") will be detected and blocked.
+                  Please keep your review respectful and appropriate.
                 </p>
               </div>
 
-              {/* Submit Button */}
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 className="w-full bg-primary text-white py-3 rounded-lg font-medium shadow-lg hover:bg-primary-dull transition-colors"
               >
-                Submit Review
+                {editingId ? 'Update Review' : 'Submit Review'}
               </motion.button>
             </div>
           </motion.form>
         )}
       </AnimatePresence>
 
-      {/* Testimonials Carousel */}
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
       ) : filteredTestimonials.length > 0 ? (
-        <div className="relative">
-          {/* Navigation Buttons - Only show if more than 3 reviews */}
-          {filteredTestimonials.length > itemsPerPage && (
-            <>
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handlePrev}
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 z-10 bg-white shadow-xl rounded-full p-3 hover:bg-primary hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </motion.button>
-              
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleNext}
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 z-10 bg-white shadow-xl rounded-full p-3 hover:bg-primary hover:text-white transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </motion.button>
-            </>
-          )}
-
-          {/* Carousel Container */}
-          <div className="relative px-8">
-            <div className="overflow-hidden">
-              <div className="px-4 py-6">
-                <AnimatePresence initial={false} custom={direction} mode="wait">
-                  <motion.div 
-                    key={currentPage}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 }
-                    }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
-                  >
-                    {getCurrentTestimonials().map((testimonial) => (
-                      <motion.div 
-                        key={testimonial._id}
-                        whileHover={{ 
-                          y: -8, 
-                          scale: 1.02,
-                          transition: { duration: 0.3 }
-                        }}
-                        className="bg-white p-6 rounded-xl shadow-lg cursor-pointer"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
+          {filteredTestimonials.map((testimonial) => (
+            <motion.div 
+              key={testimonial._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              whileHover={{ 
+                y: -8, 
+                scale: 1.02,
+                transition: { duration: 0.3 }
+              }}
+              className="bg-white p-6 rounded-xl shadow-lg cursor-pointer relative"
+            >
+              {/* Action buttons - Only show for logged in users */}
+              {user && (
+                <div className="absolute top-4 right-4 flex gap-2">
+                  {String(user._id) === String(testimonial.userId) && (
+                    <>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleEdit(testimonial)}
+                        className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                        title="Edit review"
                       >
-                        <div className="flex items-center gap-3">
-                          <motion.div
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            transition={{ duration: 0.3 }}
-                            className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dull flex items-center justify-center text-white font-bold text-xl"
-                          >
-                            {testimonial.name.charAt(0).toUpperCase()}
-                          </motion.div>
-                          <div>
-                            <p className="text-lg font-semibold">{testimonial.name}</p>
-                            <p className="text-gray-400 text-sm">{formatDate(testimonial.createdAt)}</p>
-                          </div>
-                        </div>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => handleDeleteClick(testimonial._id)}
+                        className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors"
+                        title="Delete review"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </motion.button>
+                    </>
+                  )}
+                  {String(user._id) !== String(testimonial.userId) && (
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => handleReportClick(testimonial._id)}
+                      className="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition-colors"
+                      title="Report review"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      </svg>
+                    </motion.button>
+                  )}
+                </div>
+              )}
 
-                        <div className="flex items-center gap-1 mt-4">
-                          {Array(testimonial.rating).fill(0).map((_, starIndex) => (
-                            <StarIcon key={starIndex} filled={true} className="w-5 h-5 text-yellow-400" />
-                          ))}
-                        </div>
-
-                        <p className="text-gray-600 mt-4 leading-relaxed">
-                          "{testimonial.testimonial}"
-                        </p>
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                </AnimatePresence>
+              <div className="flex items-center gap-3 mt-8">
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary-dull flex items-center justify-center text-white font-bold text-xl"
+                >
+                  {testimonial.name.charAt(0).toUpperCase()}
+                </motion.div>
+                <div>
+                  <p className="text-lg font-semibold">{testimonial.name}</p>
+                  <p className="text-gray-400 text-sm">{formatDate(testimonial.createdAt)}</p>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Carousel Indicators - Only show if more than 3 reviews */}
-          {filteredTestimonials.length > itemsPerPage && (
-            <div className="flex justify-center gap-2 mt-8">
-              {Array.from({ length: totalPages }).map((_, index) => (
-                <motion.button
-                  key={index}
-                  whileHover={{ scale: 1.2 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => {
-                    setDirection(index > currentPage ? 1 : -1)
-                    setCurrentPage(index)
-                  }}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentPage 
-                      ? 'w-8 bg-primary' 
-                      : 'w-2 bg-gray-300 hover:bg-primary/50'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
+              <div className="flex items-center gap-1 mt-4">
+                {Array(testimonial.rating).fill(0).map((_, starIndex) => (
+                  <StarIcon key={starIndex} filled={true} className="w-5 h-5 text-yellow-400" />
+                ))}
+              </div>
+
+              <p className="text-gray-600 mt-4 leading-relaxed">
+                "{testimonial.testimonial}"
+              </p>
+            </motion.div>
+          ))}
         </div>
       ) : (
         <div className="text-center py-12 text-gray-500">
@@ -726,6 +674,108 @@ const Testimonial = () => {
           </p>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowDeleteModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Delete Review?</h3>
+                <p className="text-gray-500 mb-6">
+                  Are you sure you want to delete this review? This action cannot be undone.
+                </p>
+                <div className="flex gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowDeleteModal(false)}
+                    className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={confirmDelete}
+                    className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition-colors"
+                  >
+                    Delete
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Report Confirmation Modal */}
+      <AnimatePresence>
+        {showReportModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowReportModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="text-center">
+                <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-800 mb-2">Report Review?</h3>
+                <p className="text-gray-500 mb-6">
+                  Are you sure you want to report this review? It will be reviewed by our team for inappropriate content.
+                </p>
+                <div className="flex gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowReportModal(false)}
+                    className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={confirmReport}
+                    className="flex-1 px-6 py-3 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 transition-colors"
+                  >
+                    Report
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
