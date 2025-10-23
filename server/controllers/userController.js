@@ -519,3 +519,49 @@ export const updateUserRole = async (req, res) => {
     })
   }
 }
+export const assignModeratorRole = async (req, res) => {
+  try {
+    const { email } = req.body
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email is required'
+      })
+    }
+    
+    const user = await User.findOneAndUpdate(
+      { email },
+      { role: 'moderator' },
+      { new: true }
+    ).select('-password')
+    
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    
+    console.log('✅ User assigned as moderator:', email)
+    
+    res.json({
+      success: true,
+      message: 'User is now a moderator',
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        image: user.image,
+        phone: user.phone
+      }
+    })
+  } catch (error) {
+    console.error('❌ Error assigning moderator:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to assign moderator role'
+    })
+  }
+}
