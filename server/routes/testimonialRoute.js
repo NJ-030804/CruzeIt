@@ -2,18 +2,23 @@ import express from 'express'
 import { 
   createTestimonial, 
   getLatestTestimonials, 
-  getAllTestimonials 
+  getAllTestimonials,
+  updateTestimonial,
+  deleteTestimonial,
+  reportTestimonial
 } from '../controllers/TestimonialController.js'
+import { protect } from '../middleware/auth.js'
 
 const router = express.Router()
 
-// Create a new testimonial (public)
-router.post('/create', createTestimonial)
-
-// Get latest 3 testimonials (public)
+// Public routes
 router.get('/latest', getLatestTestimonials)
-
-// Get all testimonials (optional - for admin)
 router.get('/all', getAllTestimonials)
+
+// Protected routes (require authentication)
+router.post('/create', protect, createTestimonial)
+router.put('/update/:id', protect, updateTestimonial)
+router.delete('/delete/:id', protect, deleteTestimonial)
+router.post('/report/:id', protect, reportTestimonial)
 
 export default router
