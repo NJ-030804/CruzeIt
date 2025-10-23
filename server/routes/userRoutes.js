@@ -7,7 +7,8 @@ import {
     deleteAccount,
     sendVerification,
     verifyRegister,
-    resendVerification
+    resendVerification,
+    updateUserRole
 } from '../controllers/userController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -24,5 +25,5 @@ userRouter.post('/login', loginUser)
 userRouter.get('/data', protect, getUserData)
 userRouter.get('/cars', getCars)
 userRouter.delete('/delete-account', protect, deleteAccount)
-
+userRouter.put('/update-role', protect, updateUserRole)
 export default userRouter;
