@@ -1,6 +1,11 @@
 import mongoose from 'mongoose'
 
 const testimonialSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   name: {
     type: String,
     required: true,
@@ -16,7 +21,11 @@ const testimonialSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true
-  }
+  },
+  reportedBy: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
 }, {
   timestamps: true
 })
