@@ -12,6 +12,7 @@ import Dashboard from './pages/owner/Dashboard'
 import AddCar from './pages/owner/AddCar'
 import ManageCars from './pages/owner/ManageCars'
 import ManageBookings from './pages/owner/ManageBookings'
+import ModeratorDashboard from './components/ModeratorDashboard'
 import Login from './components/Login'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
@@ -20,6 +21,7 @@ const App = () => {
 
   const {showLogin} = useAppContext()
   const isOwnerPath = useLocation().pathname.startsWith('/owner')
+  const isModeratorPath = location.pathname.startsWith('/moderator')
 
   return (
     <>
@@ -39,9 +41,10 @@ const App = () => {
           <Route path='manage-cars' element={<ManageCars />} />
           <Route path='manage-bookings' element={<ManageBookings />} />
         </Route>
+        <Route path='/moderator' element={<ModeratorDashboard />} />
       </Routes>
 
-      {!isOwnerPath && <Footer />}
+      {!isOwnerPath && !isModeratorPath && <Footer />}
     </>
   )
 }
