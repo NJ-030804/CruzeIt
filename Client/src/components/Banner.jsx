@@ -1,13 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { assets } from '../assets/assets'
 import { motion } from 'motion/react'
 import { useAppContext } from '../context/AppContext'
 import toast from 'react-hot-toast'
 
 const Banner = () => {
-  const { user, setShowLogin, navigate, isOwner } = useAppContext()
+  const { user, setShowLogin, navigate, isOwner, axios, setUser, setIsOwner } = useAppContext()
+  const [loading, setLoading] = useState(false)
 
-  const handleListCarClick = () => {
+  const handleListCarClick = async () => {
+    // Check if user is logged in
     if (!user) {
       toast.error('Please log in or create an account to list your car', {
         duration: 4000,
@@ -20,17 +22,45 @@ const Banner = () => {
         },
       })
       setShowLogin(true)
-    } else if (isOwner) {
+      return
+    }
+
+    // If already an owner, redirect to owner dashboard
+    if (isOwner) {
       navigate('/owner')
-    } else {
-      // Redirect to change role or owner dashboard
-      navigate('/owner')
-      toast.success('Complete your profile to start listing cars!', {
-        icon: '🚗',
-        style: {
-          borderRadius: '12px',
-        },
+      return
+    }
+
+    // Update user role to owner
+    try {
+      setLoading(true)
+      const { data } = await axios.put('/api/user/update-role', {
+        role: 'owner'
       })
+
+      if (data.success) {
+        // Update user in context
+        setUser(data.user)
+        
+        // Update isOwner state
+        setIsOwner(true)
+        
+        toast.success(data.message, {
+          style: {
+            borderRadius: '12px',
+          },
+        })
+        
+        // Redirect to owner dashboard
+        navigate('/owner')
+      } else {
+        toast.error(data.message || 'Failed to update role')
+      }
+    } catch (error) {
+      console.error('Error updating role:', error)
+      toast.error(error.response?.data?.message || 'Failed to update role')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -127,23 +157,38 @@ const Banner = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          whileHover={{ scale: 1.05, y: -2, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={{ scale: loading ? 1 : 1.05, y: loading ? 0 : -2, boxShadow: loading ? 'none' : '0 20px 40px rgba(0,0,0,0.2)' }}
+          whileTap={{ scale: loading ? 1 : 0.98 }}
           onClick={handleListCarClick}
-          className='group relative px-8 py-3.5 bg-white hover:bg-slate-50 transition-all text-[#344E41] rounded-xl text-base font-semibold cursor-pointer shadow-xl overflow-hidden touch-manipulation active:scale-95'
+          disabled={loading}
+          className={`group relative px-8 py-3.5 bg-white hover:bg-slate-50 transition-all text-[#344E41] rounded-xl text-base font-semibold cursor-pointer shadow-xl overflow-hidden touch-manipulation active:scale-95 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
           style={{ 
             WebkitTapHighlightColor: 'transparent',
             userSelect: 'none'
           }}
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            List Your Car
-            <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+            {loading ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : (
+              <>
+                {isOwner ? 'Go to Dashboard' : 'List Your Car'}
+                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </>
+            )}
           </span>
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none"></div>
+          {!loading && (
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 pointer-events-none"></div>
+          )}
         </motion.button>
       </motion.div>
    
@@ -200,4 +245,5 @@ const Banner = () => {
 }
 
 export default Banner
+
 
