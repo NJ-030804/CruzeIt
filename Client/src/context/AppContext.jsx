@@ -20,7 +20,7 @@ export const AppProvider = ({ children }) => {
   const [pickupDate, setPickupDate] = useState("");
   const [returnDate, setReturnDate] = useState("");
   const [cars, setCars] = useState([]);
-
+  const [isModerator, setIsModerator] = useState(false)
   // Handle Google OAuth token from URL
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -44,10 +44,12 @@ export const AppProvider = ({ children }) => {
         console.log('User fetched successfully:', data.user);
         setUser(data.user);
         setIsOwner(data.user.role === "owner");
+        setIsModerator(data.user.role === "moderator");
       } else {
         console.log('Failed to fetch user:', data.message);
         setUser(null);
         setIsOwner(false);
+        setIsModerator(false);
       }
     } catch (error) {
       console.error('Fetch user error:', error);
@@ -56,6 +58,7 @@ export const AppProvider = ({ children }) => {
         setToken(null);
         setUser(null);
         setIsOwner(false);
+        setIsModerator(false);
       }
     }
   };
@@ -81,6 +84,7 @@ export const AppProvider = ({ children }) => {
       setToken(null);
       setUser(null);
       setIsOwner(false);
+      setIsModerator(false);
       delete axios.defaults.headers.common["Authorization"];
       toast.success("Logout successful");
       navigate("/");
@@ -119,6 +123,8 @@ export const AppProvider = ({ children }) => {
     setToken,
     isOwner,
     setIsOwner,
+    isModerator,  
+    setIsModerator,
     fetchUser,
     showLogin,
     setShowLogin,
