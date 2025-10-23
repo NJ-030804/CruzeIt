@@ -359,19 +359,30 @@ const AddCar = () => {
           </motion.div>
 
           <motion.div whileHover={{ scale: 1.01 }}>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Seating Capacity</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Seating Capacity (Max: 16)</label>
             <input
               type="number"
               placeholder="e.g. 5"
               required
               min="1"
-              max="99"
+              max="16"
               className="w-full px-4 py-3 border border-gray-300 rounded-xl outline-none text-black focus:border-green-600 focus:ring-2 focus:ring-green-100 transition-all"
               value={car.seating_capacity || ''}
               onChange={(e) => {
                 const value = e.target.value
-                if (value === '' || (Number(value) >= 1 && Number(value) <= 99 && value.length <= 2)) {
+                if (value === '') {
                   setCar({ ...car, seating_capacity: value })
+                } else {
+                  const numValue = Number(value)
+                  if (numValue >= 1 && numValue <= 16) {
+                    setCar({ ...car, seating_capacity: value })
+                  } else if (numValue > 16) {
+                    toast.error('Maximum seating capacity is 16', {
+                      style: {
+                        borderRadius: '12px',
+                      },
+                    })
+                  }
                 }
               }}
             />
