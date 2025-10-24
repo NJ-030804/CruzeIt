@@ -5,34 +5,14 @@ import { motion, useScroll, useTransform } from 'motion/react'
 
 const Hero = () => {
   const [pickupLocation, setPickupLocation] = useState('')
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-  const [filteredCities, setFilteredCities] = useState(cityList)
   const { pickupDate, setPickupDate, returnDate, setReturnDate, navigate } = useAppContext()
   
-  // Scroll animation for the car
+  // Scroll animation for the car - slower movement
   const { scrollY } = useScroll()
-  const carX = useTransform(scrollY, [0, 400], ['0%', '-150%'])
-
-  const handleLocationChange = (e) => {
-    const value = e.target.value
-    setPickupLocation(value)
-    setIsDropdownOpen(true)
-    
-    if (value.trim() === '') {
-      setFilteredCities(cityList)
-    } else {
-      setFilteredCities(
-        cityList.filter(city =>
-          city.toLowerCase().includes(value.toLowerCase())
-        )
-      )
-    }
-  }
-
-  const handleSelectCity = (city) => {
-    setPickupLocation(city)
-    setIsDropdownOpen(false)
-  }
+  const carX = useTransform(scrollY, [0, 800], ['0%', '-150%'])
+  
+  // Wheel rotation based on scroll - smoother rotation
+  const wheelRotation = useTransform(scrollY, [0, 800], [0, -1440])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -41,7 +21,7 @@ const Hero = () => {
 
   return (
     <motion.div 
-      className="min-h-screen flex flex-col items-center bg-borderColor text-center pt-16 pb-32 md:pb-40 relative overflow-hidden"
+      className="min-h-screen flex flex-col items-center bg-borderColor text-center pt-10 pb-20 md:pt-16 md:pb-32 lg:pb-40 relative overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
@@ -50,7 +30,7 @@ const Hero = () => {
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="text-4xl md:text-5xl font-semibold mb-6 px-4"
+        className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-4 md:mb-6 px-4"
       >
         Cars on Rent
       </motion.h1>
@@ -60,42 +40,30 @@ const Hero = () => {
         animate={{ scale: 1, y: 0, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.4 }}
         onSubmit={handleSearch} 
-        className="flex flex-col md:flex-row items-start md:items-center justify-between py-4 px-6 rounded-xl md:rounded-full w-full max-w-[56rem] bg-white shadow-xl mx-4"
+        className="flex flex-col md:flex-row items-start md:items-center justify-between py-3 px-4 md:py-4 md:px-6 rounded-xl md:rounded-full w-[95%] max-w-[56rem] bg-white shadow-xl mx-4"
       >
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-10 w-full md:ml-6">
-          {/* Pickup Location - Custom Dropdown */}
-          <div className="flex flex-col items-start gap-2 w-full md:w-auto relative">
-            <label className="text-sm font-medium text-gray-700">Pickup Location</label>
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 lg:gap-10 w-full md:ml-6">
+          {/* Pickup Location */}
+          <div className="flex flex-col items-start gap-1.5 md:gap-2 w-full md:w-auto">
+            <label className="text-xs md:text-sm font-medium text-gray-700">Pickup Location</label>
             <input
-              type="text"
+              list="pickup-locations"
               required
               value={pickupLocation}
-              onChange={handleLocationChange}
-              onFocus={() => setIsDropdownOpen(true)}
-              onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-              className="text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-500 focus:outline-primary focus:border-primary"
-              placeholder="Please select or type"
+              onChange={(e) => setPickupLocation(e.target.value)}
+              className="text-sm text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-400 focus:outline-primary focus:border-primary"
+              placeholder="Select or type"
             />
-            
-            {isDropdownOpen && filteredCities.length > 0 && (
-              <div className="absolute top-full left-0 mt-1 w-full md:w-48 bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-40 overflow-y-auto">
-                {filteredCities.map((city) => (
-                  <button
-                    key={city}
-                    type="button"
-                    onMouseDown={() => handleSelectCity(city)}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
-                  >
-                    {city}
-                  </button>
-                ))}
-              </div>
-            )}
+            <datalist id="pickup-locations">
+              {cityList.map((city) => (
+                <option key={city} value={city} />
+              ))}
+            </datalist>
           </div>
 
           {/* Pickup Date */}
-          <div className="flex flex-col items-start gap-2 w-full md:w-auto">
-            <label htmlFor="pickup-date" className="text-sm font-medium text-gray-700">
+          <div className="flex flex-col items-start gap-1.5 md:gap-2 w-full md:w-auto">
+            <label htmlFor="pickup-date" className="text-xs md:text-sm font-medium text-gray-700">
               Pick-up Date
             </label>
             <input 
@@ -104,14 +72,14 @@ const Hero = () => {
               type="date"
               id="pickup-date"
               min={new Date().toISOString().split('T')[0]}
-              className="text-gray-500 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
+              className="text-sm text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
               required
             />
           </div>
 
           {/* Return Date */}
-          <div className="flex flex-col items-start gap-2 w-full md:w-auto">
-            <label htmlFor="return-date" className="text-sm font-medium text-gray-700">
+          <div className="flex flex-col items-start gap-1.5 md:gap-2 w-full md:w-auto">
+            <label htmlFor="return-date" className="text-xs md:text-sm font-medium text-gray-700">
               Return Date
             </label>
             <input 
@@ -120,7 +88,7 @@ const Hero = () => {
               type="date"
               id="return-date"
               min={pickupDate || new Date().toISOString().split('T')[0]}
-              className="text-gray-500 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
+              className="text-sm text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
               required
             />
           </div>
@@ -130,16 +98,16 @@ const Hero = () => {
         <motion.button 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }} 
-          className="flex items-center justify-center gap-2 px-8 py-3 mt-4 md:mt-0 md:ml-4 bg-primary hover:bg-primary-dull text-white rounded-full cursor-pointer font-medium shadow-md w-full md:w-auto"
+          className="flex items-center justify-center gap-2 px-6 py-2.5 mt-3 md:mt-0 md:px-8 md:py-3 md:ml-4 bg-primary hover:bg-primary-dull text-white rounded-full cursor-pointer font-medium shadow-md w-full md:w-auto text-sm"
         >
           <img src={assets.search_icon} alt="search" className="brightness-200 w-4 h-4" />
           Search
         </motion.button>
       </motion.form>
 
-      {/* Animated Car with scroll behavior */}
+      {/* Animated Car with scroll behavior and rotating wheels */}
       <motion.div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[800px] pointer-events-none px-4"
+        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
         style={{ x: carX }}
         initial={{ x: '100vw' }}
         animate={{ x: '0%' }}
@@ -148,19 +116,66 @@ const Hero = () => {
           ease: [0.22, 1, 0.36, 1]
         }}
       >
-        <motion.img
-          src={assets.main_car}
-          alt="car"
-          className="w-full h-auto object-contain"
-          animate={{ 
-            y: [0, -8, 0],
-          }}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
+        <div className="relative">
+          {/* Main car body */}
+          <motion.img
+            src={assets.main_car}
+            alt="car"
+            className="w-full h-auto object-contain"
+            animate={{ 
+              y: [0, -8, 0],
+            }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+          
+          {/* Front Wheel */}
+          <motion.img
+            src={assets.main_car_wheel}
+            alt="front wheel"
+            className="absolute w-[14%] h-auto object-contain"
+            style={{ 
+              bottom: '3.5%',
+              left: '74%',
+              rotate: wheelRotation
+            }}
+            animate={{ 
+              y: [0, -8, 0]
+            }}
+            transition={{
+              y: {
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }
+            }}
+          />
+          
+          {/* Rear Wheel */}
+          <motion.img
+            src={assets.main_car_wheel}
+            alt="rear wheel"
+            className="absolute w-[14%] h-auto object-contain"
+            style={{ 
+              bottom: '3.5%',
+              right: '75%',
+              rotate: wheelRotation
+            }}
+            animate={{ 
+              y: [0, -8, 0]
+            }}
+            transition={{
+              y: {
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }
+            }}
+          />
+        </div>
       </motion.div>
     </motion.div>
   )
