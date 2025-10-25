@@ -79,7 +79,7 @@ const Hero = () => {
                 setIsDropdownOpen(true)
               }}
               onFocus={() => setIsDropdownOpen(true)}
-              className="text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-800 focus:outline-primary focus:border-primary"
+              className="text-gray-800 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-48 placeholder:text-gray-500 focus:outline-primary focus:border-primary"
               placeholder="Select or type"
             />
             {isDropdownOpen && filteredCities && (
@@ -116,7 +116,7 @@ const Hero = () => {
               type="date"
               id="pickup-date"
               min={new Date().toISOString().split('T')[0]}
-              className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
+              className={`text-sm border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary ${pickupDate ? 'text-gray-800' : 'text-gray-500'}`}
               required
             />
           </div>
@@ -132,7 +132,7 @@ const Hero = () => {
               type="date"
               id="return-date"
               min={pickupDate || new Date().toISOString().split('T')[0]}
-              className="text-sm text-gray-700 border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary"
+              className={`text-sm border border-gray-300 rounded-lg px-3 py-2 w-full md:w-auto focus:outline-primary focus:border-primary ${returnDate ? 'text-gray-800' : 'text-gray-500'}`}
               required
             />
           </div>
