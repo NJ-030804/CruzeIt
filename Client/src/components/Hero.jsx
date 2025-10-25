@@ -107,7 +107,7 @@ const Hero = () => {
 
       {/* Animated Car with scroll behavior and rotating wheels */}
       <motion.div
-        className="absolute bottom-5 md:bottom-10 lg:bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
+        className="absolute bottom-0 md:bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
         style={{ x: carX }}
         initial={{ x: '100vw' }}
         animate={{ x: '0%' }}
