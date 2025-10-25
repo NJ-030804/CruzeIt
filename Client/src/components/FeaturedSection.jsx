@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import Title from './Title'
+import { assets, dummyCarData } from '../assets/assets'
 import CarCards from './CarCards'
 import { useNavigate } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
