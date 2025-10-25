@@ -107,29 +107,21 @@ const Hero = () => {
 
       {/* Animated Car with scroll behavior and rotating wheels */}
       <motion.div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
+        className="absolute bottom-10 md:bottom-20 lg:bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
         style={{ x: carX }}
         initial={{ x: '100vw' }}
         animate={{ x: '0%' }}
         transition={{
-          duration: 2,
+          duration: 5,
           ease: [0.22, 1, 0.36, 1]
         }}
       >
         <div className="relative">
           {/* Main car body */}
-          <motion.img
+          <img
             src={assets.main_car}
             alt="car"
             className="w-full h-auto object-contain"
-            animate={{ 
-              y: [0, -8, 0],
-            }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
           />
           
           {/* Front Wheel */}
@@ -142,15 +134,11 @@ const Hero = () => {
               left: '74%',
               rotate: wheelRotation
             }}
-            animate={{ 
-              y: [0, -8, 0]
-            }}
+            initial={{ rotate: 0 }}
+            animate={{ rotate: -720 }}
             transition={{
-              y: {
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }
+              duration: 3.5,
+              ease: "linear"
             }}
           />
           
@@ -161,18 +149,14 @@ const Hero = () => {
             className="absolute w-[14%] h-auto object-contain"
             style={{ 
               bottom: '3.5%',
-              right: '75%',
+              left: '11%',
               rotate: wheelRotation
             }}
-            animate={{ 
-              y: [0, -8, 0]
-            }}
+            initial={{ rotate: 0 }}
+            animate={{ rotate: -720 }}
             transition={{
-              y: {
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }
+              duration: 3.5,
+              ease: "linear"
             }}
           />
         </div>
