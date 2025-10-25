@@ -107,7 +107,7 @@ const Hero = () => {
 
       {/* Animated Car with scroll behavior and rotating wheels */}
       <motion.div
-        className="absolute bottom-10 md:bottom-20 lg:bottom-28 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
+        className="absolute bottom-5 md:bottom-10 lg:bottom-16 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
         style={{ x: carX }}
         initial={{ x: '100vw' }}
         animate={{ x: '0%' }}
@@ -128,10 +128,10 @@ const Hero = () => {
           <motion.img
             src={assets.main_car_wheel}
             alt="front wheel"
-            className="absolute w-[14%] h-auto object-contain"
+            className="absolute w-[16%] h-auto object-contain"
             style={{ 
-              bottom: '3.5%',
-              left: '74%',
+              bottom: '20%',
+              left: '71%',
               rotate: wheelRotation
             }}
             initial={{ rotate: 0 }}
@@ -146,9 +146,9 @@ const Hero = () => {
           <motion.img
             src={assets.main_car_wheel}
             alt="rear wheel"
-            className="absolute w-[14%] h-auto object-contain"
+            className="absolute w-[16%] h-auto object-contain"
             style={{ 
-              bottom: '3.5%',
+              bottom: '20%',
               left: '11%',
               rotate: wheelRotation
             }}
