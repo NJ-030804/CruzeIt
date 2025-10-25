@@ -80,10 +80,10 @@ const Footer = () => {
   ]
 
   const resourceLinks = [
-    { text: 'Help Center',}, // path: '/help' },
-    { text: 'Terms of Service',}, // path: '/terms' },
-    { text: 'Privacy Policy',}, // path: '/privacy' },
-    { text: 'Insurance',} // path: '/insurance' }
+    { text: 'Help Center', path: '/help' },
+    { text: 'Terms of Service', path: '/terms' },
+    { text: 'Privacy Policy', path: '/privacy' },
+    { text: 'Insurance', path: '/insurance' }
   ]
 
   return (
@@ -255,8 +255,8 @@ const Footer = () => {
             {[
               { text: '1234 Drive', type: 'address' },
               { text: 'Cabanatuan, Nueva Ecija', type: 'address' },
-              { text: '+1(555)123-4567',}, // type: 'phone', href: 'tel:+15551234567' },
-              { text: 'car@example.com',} // type: 'email', href: 'mailto:car@example.com' }
+              { text: '+1(555)123-4567', type: 'phone', href: 'tel:+15551234567' },
+              { text: 'car@example.com', type: 'email', href: 'mailto:car@example.com' }
             ].map((info, index) => (
               <motion.li
                 key={index}
@@ -308,11 +308,11 @@ const Footer = () => {
           }}
         >
           {[
-            { text: 'Term',}, // path: '/terms' },
-            { text: '|',}, // divider: true },
-            { text: 'Privacy',}, // path: '/privacy' },
+            { text: 'Term', path: '/terms' },
             { text: '|', divider: true },
-            { text: 'Cookies',} // path: '/cookies' }
+            { text: 'Privacy', path: '/privacy' },
+            { text: '|', divider: true },
+            { text: 'Cookies', path: '/cookies' }
           ].map((item, index) => (
             <motion.li
               key={index}
