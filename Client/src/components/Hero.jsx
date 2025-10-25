@@ -107,7 +107,7 @@ const Hero = () => {
 
       {/* Animated Car with scroll behavior and rotating wheels */}
       <motion.div
-        className="absolute bottom-0 md:bottom-4 lg:bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[500px] md:max-w-[800px] pointer-events-none px-4"
+        className="absolute bottom-[25%] left-0 right-0 w-full pointer-events-none"
         style={{ x: carX }}
         initial={{ x: '100vw' }}
         animate={{ x: '0%' }}
@@ -116,22 +116,22 @@ const Hero = () => {
           ease: [0.22, 1, 0.36, 1]
         }}
       >
-        <div className="relative">
+        <div className="relative w-full max-w-[400px] sm:max-w-[500px] md:max-w-[700px] lg:max-w-[800px] mx-auto px-4 sm:px-6">
           {/* Main car body */}
           <img
             src={assets.main_car}
             alt="car"
-            className="w-full h-auto object-contain"
+            className="w-full h-auto object-contain block"
           />
           
           {/* Front Wheel */}
           <motion.img
             src={assets.main_car_wheel}
             alt="front wheel"
-            className="absolute w-[16%] h-auto object-contain"
+            className="absolute w-[15%] h-auto object-contain"
             style={{ 
-              bottom: '20%',
-              left: '71%',
+              bottom: '1%',
+              left: '70%',
               rotate: wheelRotation
             }}
             initial={{ rotate: 0 }}
@@ -146,10 +146,10 @@ const Hero = () => {
           <motion.img
             src={assets.main_car_wheel}
             alt="rear wheel"
-            className="absolute w-[16%] h-auto object-contain"
+            className="absolute w-[15%] h-auto object-contain"
             style={{ 
-              bottom: '20%',
-              left: '11%',
+              bottom: '1%',
+              left: '14%',
               rotate: wheelRotation
             }}
             initial={{ rotate: 0 }}
